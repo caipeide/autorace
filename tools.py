@@ -103,12 +103,14 @@ def get_record_alert_color(num_records):
 
 class RecordTracker:
     def __init__(self, cfg):
-        self.cfg = cfg        
+        self.cfg = cfg
+        self.last_record_num = -100
 
     def run(self, num_records):
         if num_records is not None:
-            if num_records % 10 == 0:
+            if num_records % 10 == 0 and num_records != self.last_record_num:
                 print("recorded", num_records, "records")
+                self.last_record_num = num_records
 
 #See if we should even run the pilot module.
 #This is only needed because the part run_condition only accepts boolean

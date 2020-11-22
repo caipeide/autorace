@@ -4,3 +4,6 @@ models/*
 .DS_Store
 
 !.gitkeep
+
+.ipynb_checkpoints
+__pycache__
