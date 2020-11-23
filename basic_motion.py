@@ -94,5 +94,5 @@ def drive(cfg):
 
 
 if __name__ == '__main__':
-    cfg = dk.load_config(myconfig=args['--myconfig'])
+    cfg = dk.load_config()
     drive(cfg)
