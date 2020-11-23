@@ -95,7 +95,7 @@ HBRIDGE_PIN_RIGHT_BWD = 13
 #between different neural network designs. You can override this setting by passing the command
 #line parameter --type to the python manage.py train and drive commands.
 DEFAULT_MODEL_TYPE = 'linear'   #(linear|categorical|rnn|imu|behavior|3d|localizer|latent)
-BATCH_SIZE = 32                #how many records to use when doing one pass of gradient decent. Use a smaller number if your gpu is running out of memory.
+BATCH_SIZE = 128                #how many records to use when doing one pass of gradient decent. Use a smaller number if your gpu is running out of memory.
 TRAIN_TEST_SPLIT = 0.8          #what percent of records to use for training. the remaining used for validation.
 MAX_EPOCHS = 100                #how many times to visit all records of your data
 SHOW_PLOT = True                #would you like to see a pop up display of final loss?
@@ -116,6 +116,13 @@ PRUNE_PERCENT_PER_ITERATION = 20 # Percenge of pruning that is perform per itera
 PRUNE_VAL_LOSS_DEGRADATION_LIMIT = 0.2 # The max amout of validation loss that is permitted during pruning.
 PRUNE_EVAL_PERCENT_OF_DATASET = .05  # percent of dataset used to perform evaluation of model.
 
+#Pi login information
+#When using the continuous train option, these credentials will
+#be used to copy the final model to your vehicle. If not using this option, no need to set these.
+PI_USERNAME = "pi"                  # username on pi
+PI_PASSWD = "raspberry"             # password is optional. Only used from Windows machine. Ubuntu and mac users should copy their public keys to the pi. `ssh-copy-id username@hostname`
+PI_HOSTNAME = "raspberrypi.local"   # the network hostname or ip address
+PI_DONKEY_ROOT = "/home/pi/mycar"   # the location of the mycar dir on the pi. this will be used to help locate the final model destination.
 
 # Region of interst cropping
 # only supported in Categorical and Linear models.
@@ -123,6 +130,11 @@ PRUNE_EVAL_PERCENT_OF_DATASET = .05  # percent of dataset used to perform evalua
 ROI_CROP_TOP = 0                    #the number of rows of pixels to ignore on the top of the image
 ROI_CROP_BOTTOM = 0                 #the number of rows of pixels to ignore on the bottom of the image
 
+#Model transfer options
+#When copying weights during a model transfer operation, should we freeze a certain number of layers
+#to the incoming weights and not allow them to change during training?
+FREEZE_LAYERS = False               #default False will allow all layers to be modified by training
+NUM_LAST_LAYERS_TO_TRAIN = 7        #when freezing layers, how many layers from the last should be allowed to train?
 
 #WEB CONTROL
 WEB_CONTROL_PORT = 8887             # which port to listen on when making a web controller
@@ -144,15 +156,141 @@ GENTLE_THROTTLE = 0.55
 RAGE_THROTTLE = 0.9
 PER_THROTTLE_STEP = 0.07
 
+#For the categorical model, this limits the upper bound of the learned throttle
+#it's very IMPORTANT that this value is matched from the training PC config.py and the robot.py
+#and ideally wouldn't change once set.
+MODEL_CATEGORICAL_MAX_THROTTLE_RANGE = 0.5
+
 #RNN or 3D
 SEQUENCE_LENGTH = 3             #some models use a number of images over time. This controls how many.
 
+#IMU
+HAVE_IMU = False                #when true, this add a Mpu6050 part and records the data. Can be used with a
+IMU_SENSOR = 'mpu6050'          # (mpu6050|mpu9250)
+IMU_DLP_CONFIG = 0              # Digital Lowpass Filter setting (0:250Hz, 1:184Hz, 2:92Hz, 3:41Hz, 4:20Hz, 5:10Hz, 6:5Hz)
+
+#SOMBRERO
+HAVE_SOMBRERO = False           #set to true when using the sombrero hat from the Donkeycar store. This will enable pwm on the hat.
+
+#ROBOHAT MM1
+HAVE_ROBOHAT = False            # set to true when using the Robo HAT MM1 from Robotics Masters.  This will change to RC Control.
+MM1_STEERING_MID = 1500         # Adjust this value if your car cannot run in a straight line
+MM1_MAX_FORWARD = 2000          # Max throttle to go fowrward. The bigger the faster
+MM1_STOPPED_PWM = 1500
+MM1_MAX_REVERSE = 1000          # Max throttle to go reverse. The smaller the faster
+MM1_SHOW_STEERING_VALUE = False
+# Serial port 
+# -- Default Pi: '/dev/ttyS0'
+# -- Jetson Nano: '/dev/ttyTHS1'
+# -- Google coral: '/dev/ttymxc0'
+# -- Windows: 'COM3', Arduino: '/dev/ttyACM0'
+# -- MacOS/Linux:please use 'ls /dev/tty.*' to find the correct serial port for mm1 
+#  eg.'/dev/tty.usbmodemXXXXXX' and replace the port accordingly
+MM1_SERIAL_PORT = '/dev/ttyS0'  # Serial Port for reading and sending MM1 data.
+
 #RECORD OPTIONS
 RECORD_DURING_AI = True        #normally we do not record during ai mode. Set this to true to get image and steering records for your Ai. Be careful not to use them to train.
+
+#LED
+HAVE_RGB_LED = False            #do you have an RGB LED like https://www.amazon.com/dp/B07BNRZWNF
+LED_INVERT = False              #COMMON ANODE? Some RGB LED use common anode. like https://www.amazon.com/Xia-Fly-Tri-Color-Emitting-Diffused/dp/B07MYJQP8B
+
+#LED board pin number for pwm outputs
+#These are physical pinouts. See: https://www.raspberrypi-spy.co.uk/2012/06/simple-guide-to-the-rpi-gpio-header-and-pins/
+LED_PIN_R = 12
+LED_PIN_G = 10
+LED_PIN_B = 16
+
+#LED status color, 0-100
+LED_R = 0
+LED_G = 0
+LED_B = 1
+
+#LED Color for record count indicator
+REC_COUNT_ALERT = 1000          #how many records before blinking alert
+REC_COUNT_ALERT_CYC = 15        #how many cycles of 1/20 of a second to blink per REC_COUNT_ALERT records
+REC_COUNT_ALERT_BLINK_RATE = 0.4 #how fast to blink the led in seconds on/off
+
+#first number is record count, second tuple is color ( r, g, b) (0-100)
+#when record count exceeds that number, the color will be used
+RECORD_ALERT_COLOR_ARR = [ (0, (1, 1, 1)),
+            (3000, (5, 5, 5)),
+            (5000, (5, 2, 0)),
+            (10000, (0, 5, 0)),
+            (15000, (0, 5, 5)),
+            (20000, (0, 0, 5)), ]
+
+
+#LED status color, 0-100, for model reloaded alert
+MODEL_RELOADED_LED_R = 100
+MODEL_RELOADED_LED_G = 0
+MODEL_RELOADED_LED_B = 0
+
+
+#BEHAVIORS
+#When training the Behavioral Neural Network model, make a list of the behaviors,
+#Set the TRAIN_BEHAVIORS = True, and use the BEHAVIOR_LED_COLORS to give each behavior a color
+TRAIN_BEHAVIORS = False
+BEHAVIOR_LIST = ['Left_Lane', "Right_Lane"]
+BEHAVIOR_LED_COLORS =[ (0, 10, 0), (10, 0, 0) ] #RGB tuples 0-100 per chanel
+
+#Localizer
+#The localizer is a neural network that can learn to predice it's location on the track.
+#This is an experimental feature that needs more developement. But it can currently be used
+#to predict the segement of the course, where the course is divided into NUM_LOCATIONS segments.
+TRAIN_LOCALIZER = False
+NUM_LOCATIONS = 10
+BUTTON_PRESS_NEW_TUB = False #when enabled, makes it easier to divide our data into one tub per track length if we make a new tub on each X button press.
+
+#DonkeyGym
+#Only on Ubuntu linux, you can use the simulator as a virtual donkey and
+#issue the same python manage.py drive command as usual, but have them control a virtual car.
+#This enables that, and sets the path to the simualator and the environment.
+#You will want to download the simulator binary from: https://github.com/tawnkramer/donkey_gym/releases/download/v18.9/DonkeySimLinux.zip
+#then extract that and modify DONKEY_SIM_PATH.
+DONKEY_GYM = False
+DONKEY_SIM_PATH = "path to sim" #"/home/tkramer/projects/sdsandbox/sdsim/build/DonkeySimLinux/donkey_sim.x86_64" when racing on virtual-race-league use "remote", or user "remote" when you want to start the sim manually first.
+DONKEY_GYM_ENV_NAME = "donkey-mountain-track-v0" # ("donkey-generated-track-v0"|"donkey-generated-roads-v0"|"donkey-warehouse-v0"|"donkey-avc-sparkfun-v0")
+GYM_CONF = { "body_style" : "donkey", "body_rgb" : (128, 128, 128), "car_name" : "car", "font_size" : 100} # body style(donkey|bare|car01) body rgb 0-255
+GYM_CONF["racer_name"] = "Your Name"
+GYM_CONF["country"] = "Place"
+GYM_CONF["bio"] = "I race robots."
+
+SIM_HOST = "127.0.0.1"              # when racing on virtual-race-league use host "trainmydonkey.com"
+SIM_ARTIFICIAL_LATENCY = 0          # this is the millisecond latency in controls. Can use useful in emulating the delay when useing a remote server. values of 100 to 400 probably reasonable.
 
 #publish camera over network
 #This is used to create a tcp service to pushlish the camera feed
 PUB_CAMERA_IMAGES = False
 
+#When racing, to give the ai a boost, configure these values.
+AI_LAUNCH_DURATION = 0.0            # the ai will output throttle for this many seconds
+AI_LAUNCH_THROTTLE = 0.0            # the ai will output this throttle value
+AI_LAUNCH_ENABLE_BUTTON = 'R2'      # this keypress will enable this boost. It must be enabled before each use to prevent accidental trigger.
+AI_LAUNCH_KEEP_ENABLED = False      # when False ( default) you will need to hit the AI_LAUNCH_ENABLE_BUTTON for each use. This is safest. When this True, is active on each trip into "local" ai mode.
+
 #Scale the output of the throttle of the ai pilot for all model types.
 AI_THROTTLE_MULT = 1.0              # this multiplier will scale every throttle value for all output from NN models
+
+#Path following
+PATH_FILENAME = "donkey_path.pkl"   # the path will be saved to this filename
+PATH_SCALE = 5.0                    # the path display will be scaled by this factor in the web page
+PATH_OFFSET = (0, 0)                # 255, 255 is the center of the map. This offset controls where the origin is displayed.
+PATH_MIN_DIST = 0.3                 # after travelling this distance (m), save a path point
+PID_P = -10.0                       # proportional mult for PID path follower
+PID_I = 0.000                       # integral mult for PID path follower
+PID_D = -0.2                        # differential mult for PID path follower
+PID_THROTTLE = 0.2                  # constant throttle value during path following
+SAVE_PATH_BTN = "cross"             # joystick button to save path
+RESET_ORIGIN_BTN = "triangle"       # joystick button to press to move car back to origin
+
+# Intel Realsense D435 and D435i depth sensing camera
+REALSENSE_D435_RGB = True       # True to capture RGB image
+REALSENSE_D435_DEPTH = True     # True to capture depth as image array
+REALSENSE_D435_IMU = False      # True to capture IMU data (D435i only)
+REALSENSE_D435_ID = None        # serial number of camera or None if you only have one camera (it will autodetect)
+
+# Stop Sign Detector
+STOP_SIGN_DETECTOR = False
+STOP_SIGN_MIN_SCORE = 0.2
+STOP_SIGN_SHOW_BOUNDING_BOX = True
