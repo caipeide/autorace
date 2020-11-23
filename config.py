@@ -21,11 +21,11 @@ DATA_PATH = os.path.join(CAR_PATH, 'data')
 MODELS_PATH = os.path.join(CAR_PATH, 'models')
 
 #VEHICLE
-DRIVE_LOOP_HZ = 10      # the vehicle loop will pause if faster than this speed.
+DRIVE_LOOP_HZ = 20      # the vehicle loop will pause if faster than this speed.
 MAX_LOOPS = None        # the vehicle loop can abort after this many iterations, when given a positive integer.
 
 #CAMERA
-CAMERA_TYPE = "CSIC"   # (PICAM|WEBCAM|CVCAM|CSIC|V4L|D435|MOCK|IMAGE_LIST), We use CSIC in this competition.
+CAMERA_TYPE = "CSIC"   # (PICAM|WEBCAM|CVCAM|CSIC|V4L|D435|MOCK|IMAGE_LIST)
 IMAGE_W = 224
 IMAGE_H = 224
 IMAGE_DEPTH = 3         # default RGB=3, make 1 for mono
@@ -35,9 +35,24 @@ CAMERA_HFLIP = False
 # For CSIC camera - If the camera is mounted in a rotated position, changing the below parameter will correct the output frame orientation
 CSIC_CAM_GSTREAMER_FLIP_PARM = 0 # (0 => none , 4 => Flip horizontally, 6 => Flip vertically)
 
+# For IMAGE_LIST camera
+# PATH_MASK = "~/mycar/data/tub_1_20-03-12/*.jpg"
+
 #9865, over rides only if needed, ie. TX2..
 PCA9685_I2C_ADDR = 0x40     #I2C address, use i2cdetect to validate this number
 PCA9685_I2C_BUSNUM = 1   #None will auto detect, which is fine on the pi. But other platforms should specify the bus num.
+
+#SSD1306_128_32
+USE_SSD1306_128_32 = False    # Enable the SSD_1306 OLED Display
+SSD1306_128_32_I2C_BUSNUM = 1 # I2C bus number
+
+#DRIVETRAIN
+#These options specify which chasis and motor setup you are using. Most are using SERVO_ESC.
+#DC_STEER_THROTTLE uses HBridge pwm to control one steering dc motor, and one drive wheel motor
+#DC_TWO_WHEEL uses HBridge pwm to control two drive motors, one on the left, and one on the right.
+#SERVO_HBRIDGE_PWM use ServoBlaster to output pwm control from the PiZero directly to control steering, and HBridge for a drive motor.
+#PIGPIO_PWM uses Raspberrys internal PWM
+DRIVE_TRAIN_TYPE = "SERVO_ESC" # SERVO_ESC|DC_STEER_THROTTLE|DC_TWO_WHEEL|SERVO_HBRIDGE_PWM|PIGPIO_PWM|MM1|MOCK
 
 #STEERING
 STEERING_CHANNEL = 0            #channel on the 9685 pwm board 0-15
@@ -51,14 +66,28 @@ STEERING_PWM_INVERTED = False   #If PWM needs to be inverted
 
 #THROTTLE
 THROTTLE_CHANNEL = 1            #channel on the 9685 pwm board 0-15
-THROTTLE_FORWARD_PWM = 435      #500, pwm value for max forward throttle 460
-THROTTLE_STOPPED_PWM = 415      #pwm value for no movement
+THROTTLE_FORWARD_PWM = 430      #500, pwm value for max forward throttle 460
+THROTTLE_STOPPED_PWM = 400      #pwm value for no movement
 THROTTLE_REVERSE_PWM = 300      #220, pwm value for max reverse throttle
 
 #THROTTLE FOR PIGPIO_PWM
 THROTTLE_PWM_PIN = 18           #Pin numbering according to Broadcom numbers
 THROTTLE_PWM_FREQ = 50          #Frequency for PWM
 THROTTLE_PWM_INVERTED = False   #If PWM needs to be inverted
+
+#DC_STEER_THROTTLE with one motor as steering, one as drive
+#these GPIO pinouts are only used for the DRIVE_TRAIN_TYPE=DC_STEER_THROTTLE
+HBRIDGE_PIN_LEFT = 18
+HBRIDGE_PIN_RIGHT = 16
+HBRIDGE_PIN_FWD = 15
+HBRIDGE_PIN_BWD = 13
+
+#DC_TWO_WHEEL - with two wheels as drive, left and right.
+#these GPIO pinouts are only used for the DRIVE_TRAIN_TYPE=DC_TWO_WHEEL
+HBRIDGE_PIN_LEFT_FWD = 18
+HBRIDGE_PIN_LEFT_BWD = 16
+HBRIDGE_PIN_RIGHT_FWD = 15
+HBRIDGE_PIN_RIGHT_BWD = 13
 
 
 #TRAINING
@@ -87,11 +116,13 @@ PRUNE_PERCENT_PER_ITERATION = 20 # Percenge of pruning that is perform per itera
 PRUNE_VAL_LOSS_DEGRADATION_LIMIT = 0.2 # The max amout of validation loss that is permitted during pruning.
 PRUNE_EVAL_PERCENT_OF_DATASET = .05  # percent of dataset used to perform evaluation of model.
 
+
 # Region of interst cropping
 # only supported in Categorical and Linear models.
 # If these crops values are too large, they will cause the stride values to become negative and the model with not be valid.
 ROI_CROP_TOP = 0                    #the number of rows of pixels to ignore on the top of the image
 ROI_CROP_BOTTOM = 0                 #the number of rows of pixels to ignore on the bottom of the image
+
 
 #WEB CONTROL
 WEB_CONTROL_PORT = 8887             # which port to listen on when making a web controller
@@ -99,15 +130,15 @@ WEB_INIT_MODE = "user"              # which control mode to start in. one of use
 
 #JOYSTICK
 USE_JOYSTICK_AS_DEFAULT = False     #when starting the manage.py, when True, will not require a --js option to use the joystick
-JOYSTICK_MAX_THROTTLE = 0.6         #this scalar is multiplied with the -1 to 1 throttle value to limit the maximum throttle. This can help if you drop the controller or just don't need the full speed available.
+JOYSTICK_MAX_THROTTLE = 1.0         #this scalar is multiplied with the -1 to 1 throttle value to limit the maximum throttle. This can help if you drop the controller or just don't need the full speed available.
 JOYSTICK_STEERING_SCALE = 1.0       #some people want a steering that is less sensitve. This scalar is multiplied with the steering -1 to 1. It can be negative to reverse dir.
-AUTO_RECORD_ON_THROTTLE = True      #if true, we will record whenever throttle is not zero. if false, you must manually toggle recording with some other trigger. Usually circle button on joystick.
+AUTO_RECORD_ON_THROTTLE = False      #if true, we will record whenever throttle is not zero. if false, you must manually toggle recording with some other trigger. Usually circle button on joystick.
 CONTROLLER_TYPE='xbox'               #(ps3|ps4|xbox|nimbus|wiiu|F710|rc3|MM1|custom) custom will run the my_joystick.py controller written by the `donkey createjs` command
 USE_NETWORKED_JS = False            #should we listen for remote joystick control over the network?
 NETWORK_JS_SERVER_IP = "192.168.0.1"#when listening for network joystick control, which ip is serving this information
 JOYSTICK_DEADZONE = 0.0             # when non zero, this is the smallest throttle before recording triggered.
 JOYSTICK_THROTTLE_DIR = -1.0        # use -1.0 to flip forward/backward, use 1.0 to use joystick's natural forward/backward
-USE_FPV = False                     # send camera data to FPV webserver
+USE_FPV = True                     # send camera data to FPV webserver
 JOYSTICK_DEVICE_FILE = "/dev/input/js0" # this is the unix file use to access the joystick.
 GENTLE_THROTTLE = 0.55
 RAGE_THROTTLE = 0.9
@@ -117,8 +148,7 @@ PER_THROTTLE_STEP = 0.07
 SEQUENCE_LENGTH = 3             #some models use a number of images over time. This controls how many.
 
 #RECORD OPTIONS
-RECORD_DURING_AI = False        #normally we do not record during ai mode. Set this to true to get image and steering records for your Ai. Be careful not to use them to train.
-
+RECORD_DURING_AI = True        #normally we do not record during ai mode. Set this to true to get image and steering records for your Ai. Be careful not to use them to train.
 
 #publish camera over network
 #This is used to create a tcp service to pushlish the camera feed
