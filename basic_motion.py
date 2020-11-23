@@ -25,10 +25,10 @@ class RandomActionGenerator:
         # used for threaded version.
         while True:
             print('!!! action changing randomly !!!')
-            random = random.random() # generate a random number in [0,1]
-            self.steering = (self.max_steering - self.min_steering) * random + self.min_steering
-            random = random.random()
-            self.throttle = (self.max_throttle - self.min_throttle) * random + self.min_throttle
+            p = random.random() # generate a random number in [0,1]
+            self.steering = (self.max_steering - self.min_steering) * p + self.min_steering
+            p = random.random()
+            self.throttle = (self.max_throttle - self.min_throttle) * p + self.min_throttle
             print(' --> random action generator, steering = %.2f, throttle = %.2f'%(self.steering, self.throttle))
             time.sleep(5) # sleep for 5 seconds in this thread
     
