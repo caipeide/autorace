@@ -66,8 +66,8 @@ STEERING_PWM_INVERTED = False   #If PWM needs to be inverted
 
 #THROTTLE
 THROTTLE_CHANNEL = 1            #channel on the 9685 pwm board 0-15
-THROTTLE_FORWARD_PWM = 430      #500, pwm value for max forward throttle 460
-THROTTLE_STOPPED_PWM = 400      #pwm value for no movement
+THROTTLE_FORWARD_PWM = 433      #500, pwm value for max forward throttle 460
+THROTTLE_STOPPED_PWM = 415      #pwm value for no movement
 THROTTLE_REVERSE_PWM = 300      #220, pwm value for max reverse throttle
 
 #THROTTLE FOR PIGPIO_PWM
