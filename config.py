@@ -21,7 +21,7 @@ DATA_PATH = os.path.join(CAR_PATH, 'data')
 MODELS_PATH = os.path.join(CAR_PATH, 'models')
 
 #VEHICLE
-DRIVE_LOOP_HZ = 10      # the vehicle loop will pause if faster than this speed.
+DRIVE_LOOP_HZ = 20      # the vehicle loop will pause if faster than this speed.
 MAX_LOOPS = None        # the vehicle loop can abort after this many iterations, when given a positive integer.
 
 #CAMERA
@@ -51,9 +51,9 @@ STEERING_PWM_INVERTED = False   #If PWM needs to be inverted
 
 #THROTTLE
 THROTTLE_CHANNEL = 1            #channel on the 9685 pwm board 0-15
-THROTTLE_FORWARD_PWM = 430      #500, pwm value for max forward throttle 460
+THROTTLE_FORWARD_PWM = 435      #500, pwm value for max forward throttle 460
 THROTTLE_STOPPED_PWM = 400      #pwm value for no movement
-THROTTLE_REVERSE_PWM = 300      #220, pwm value for max reverse throttle
+THROTTLE_REVERSE_PWM = 330      #220, pwm value for max reverse throttle
 
 #THROTTLE FOR PIGPIO_PWM
 THROTTLE_PWM_PIN = 18           #Pin numbering according to Broadcom numbers
@@ -66,7 +66,7 @@ THROTTLE_PWM_INVERTED = False   #If PWM needs to be inverted
 #between different neural network designs. You can override this setting by passing the command
 #line parameter --type to the python manage.py train and drive commands.
 DEFAULT_MODEL_TYPE = 'linear'   #(linear|categorical|rnn|imu|behavior|3d|localizer|latent)
-BATCH_SIZE = 32                #how many records to use when doing one pass of gradient decent. Use a smaller number if your gpu is running out of memory.
+BATCH_SIZE = 128                #how many records to use when doing one pass of gradient decent. Use a smaller number if your gpu is running out of memory.
 TRAIN_TEST_SPLIT = 0.8          #what percent of records to use for training. the remaining used for validation.
 MAX_EPOCHS = 100                #how many times to visit all records of your data
 SHOW_PLOT = True                #would you like to see a pop up display of final loss?
@@ -81,11 +81,11 @@ LEARNING_RATE_DECAY = 0.0       #only used when OPTIMIZER specified
 SEND_BEST_MODEL_TO_PI = False   #change to true to automatically send best model during training
 CACHE_IMAGES = True             #keep images in memory. will speed succesive epochs, but crater if not enough mem.
 
-PRUNE_CNN = False               #This will remove weights from your model. The primary goal is to increase performance.
-PRUNE_PERCENT_TARGET = 75       # The desired percentage of pruning.
-PRUNE_PERCENT_PER_ITERATION = 20 # Percenge of pruning that is perform per iteration.
-PRUNE_VAL_LOSS_DEGRADATION_LIMIT = 0.2 # The max amout of validation loss that is permitted during pruning.
-PRUNE_EVAL_PERCENT_OF_DATASET = .05  # percent of dataset used to perform evaluation of model.
+# PRUNE_CNN = False               #This will remove weights from your model. The primary goal is to increase performance.
+# PRUNE_PERCENT_TARGET = 75       # The desired percentage of pruning.
+# PRUNE_PERCENT_PER_ITERATION = 20 # Percenge of pruning that is perform per iteration.
+# PRUNE_VAL_LOSS_DEGRADATION_LIMIT = 0.2 # The max amout of validation loss that is permitted during pruning.
+# PRUNE_EVAL_PERCENT_OF_DATASET = .05  # percent of dataset used to perform evaluation of model.
 
 # Region of interst cropping
 # only supported in Categorical and Linear models.
@@ -99,7 +99,7 @@ WEB_INIT_MODE = "user"              # which control mode to start in. one of use
 
 #JOYSTICK
 USE_JOYSTICK_AS_DEFAULT = False     #when starting the manage.py, when True, will not require a --js option to use the joystick
-JOYSTICK_MAX_THROTTLE = 0.6         #this scalar is multiplied with the -1 to 1 throttle value to limit the maximum throttle. This can help if you drop the controller or just don't need the full speed available.
+JOYSTICK_MAX_THROTTLE = 0.7         #this scalar is multiplied with the -1 to 1 throttle value to limit the maximum throttle. This can help if you drop the controller or just don't need the full speed available.
 JOYSTICK_STEERING_SCALE = 1.0       #some people want a steering that is less sensitve. This scalar is multiplied with the steering -1 to 1. It can be negative to reverse dir.
 AUTO_RECORD_ON_THROTTLE = True      #if true, we will record whenever throttle is not zero. if false, you must manually toggle recording with some other trigger. Usually circle button on joystick.
 CONTROLLER_TYPE='xbox'               #(ps3|ps4|xbox|nimbus|wiiu|F710|rc3|MM1|custom) custom will run the my_joystick.py controller written by the `donkey createjs` command
@@ -109,9 +109,9 @@ JOYSTICK_DEADZONE = 0.0             # when non zero, this is the smallest thrott
 JOYSTICK_THROTTLE_DIR = -1.0        # use -1.0 to flip forward/backward, use 1.0 to use joystick's natural forward/backward
 USE_FPV = False                     # send camera data to FPV webserver
 JOYSTICK_DEVICE_FILE = "/dev/input/js0" # this is the unix file use to access the joystick.
-GENTLE_THROTTLE = 0.55
-RAGE_THROTTLE = 0.9
-PER_THROTTLE_STEP = 0.07
+GENTLE_THROTTLE = 0.65
+RAGE_THROTTLE = 0.85
+PER_THROTTLE_STEP = 0.05
 
 #RNN or 3D
 SEQUENCE_LENGTH = 3             #some models use a number of images over time. This controls how many.
