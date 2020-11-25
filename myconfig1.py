@@ -21,7 +21,7 @@ DATA_PATH = os.path.join(CAR_PATH, 'data')
 MODELS_PATH = os.path.join(CAR_PATH, 'models')
 
 #VEHICLE
-DRIVE_LOOP_HZ = 15      # the vehicle loop will pause if faster than this speed.
+DRIVE_LOOP_HZ = 20      # the vehicle loop will pause if faster than this speed.
 MAX_LOOPS = None        # the vehicle loop can abort after this many iterations, when given a positive integer.
 
 #CAMERA
@@ -51,7 +51,7 @@ STEERING_PWM_INVERTED = False   #If PWM needs to be inverted
 
 #THROTTLE
 THROTTLE_CHANNEL = 1            #channel on the 9685 pwm board 0-15
-THROTTLE_FORWARD_PWM = 440      #500, pwm value for max forward throttle 460
+THROTTLE_FORWARD_PWM = 441      #500, pwm value for max forward throttle 460
 THROTTLE_STOPPED_PWM = 390      #pwm value for no movement
 THROTTLE_REVERSE_PWM = 300      #220, pwm value for max reverse throttle
 
