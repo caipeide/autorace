@@ -229,7 +229,7 @@ def start_train(cfg, tub_names, model_path, model_type, sequence_train = False):
         shutil.rmtree(path_tensorboard)
     writer = SummaryWriter(path_tensorboard)
     # early stopping patience; how long to wait after last time validation loss improved.
-    patience = 20
+    patience = cfg.EARLY_STOP_PATIENCE
     params = drive_model.parameters()
     optimizer = torch.optim.Adam(params, lr=cfg.LEARNING_RATE)
 
