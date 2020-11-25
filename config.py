@@ -52,7 +52,7 @@ STEERING_PWM_INVERTED = False   #If PWM needs to be inverted
 #THROTTLE
 THROTTLE_CHANNEL = 1            #channel on the 9685 pwm board 0-15
 THROTTLE_FORWARD_PWM = 435      #500, pwm value for max forward throttle 460
-THROTTLE_STOPPED_PWM = 400      #pwm value for no movement
+THROTTLE_STOPPED_PWM = 390      #pwm value for no movement
 THROTTLE_REVERSE_PWM = 330      #220, pwm value for max reverse throttle
 
 #THROTTLE FOR PIGPIO_PWM
@@ -107,7 +107,7 @@ USE_NETWORKED_JS = False            #should we listen for remote joystick contro
 NETWORK_JS_SERVER_IP = "192.168.0.1"#when listening for network joystick control, which ip is serving this information
 JOYSTICK_DEADZONE = 0.0             # when non zero, this is the smallest throttle before recording triggered.
 JOYSTICK_THROTTLE_DIR = -1.0        # use -1.0 to flip forward/backward, use 1.0 to use joystick's natural forward/backward
-USE_FPV = False                     # send camera data to FPV webserver
+USE_FPV = True                     # send camera data to FPV webserver
 JOYSTICK_DEVICE_FILE = "/dev/input/js0" # this is the unix file use to access the joystick.
 GENTLE_THROTTLE = 0.65
 RAGE_THROTTLE = 0.85
