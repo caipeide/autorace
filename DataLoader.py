@@ -31,6 +31,8 @@ class SelfDriveDataset(Dataset):
 
         rgb_path = this_data['image_path']
         rgb = Image.open(rgb_path)
+        if self.transform is not None: # add noise to the dataset...just for training... 
+            rgb = self.transform(rgb)
         rgb = transforms.ToTensor()(rgb)
         # TODO add transforms later...
 
@@ -39,8 +41,7 @@ class SelfDriveDataset(Dataset):
                 'steering': torch.from_numpy(future_steer).float(),
                 'throttle': torch.from_numpy(future_throttle).float()}
         
-        if self.transform: # add noise to the dataset...just for training... 
-            sample = self.transform(sample)
+        
 
         return sample
 
@@ -48,8 +49,7 @@ class SelfDriveDataset(Dataset):
 def load_split_train_valid(cfg, collate_records_dict_dict, num_workers=2):
 
     batch_size = cfg.BATCH_SIZE
-    # train_transforms = transforms.Compose([ToTensor()])  # add image noise later...
-    train_transforms = None
+    train_transforms = transforms.Compose([transforms.ColorJitter(brightness=0.3, contrast=0.3, saturation=0.2, hue=0.3)])  # add image noise later...
 
     # new_records now contains all our NEW samples
     # - set a random selection to be the training samples based on the ratio in CFG file
@@ -70,7 +70,7 @@ def load_split_train_valid(cfg, collate_records_dict_dict, num_workers=2):
             valid_data_list_dict.append(collate_records_dict_dict[key])
 
     train_data = SelfDriveDataset(train_data_list_dict,transform=train_transforms)
-    valid_data = SelfDriveDataset(valid_data_list_dict,transform=train_transforms)
+    valid_data = SelfDriveDataset(valid_data_list_dict,transform=None)
 
     trainloader = DataLoader(train_data, batch_size=batch_size, num_workers=num_workers, shuffle=True)
     validloader = DataLoader(valid_data, batch_size=batch_size, num_workers=num_workers, shuffle=True)
