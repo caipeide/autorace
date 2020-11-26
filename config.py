@@ -66,13 +66,13 @@ THROTTLE_PWM_INVERTED = False   #If PWM needs to be inverted
 #between different neural network designs. You can override this setting by passing the command
 #line parameter --type to the python manage.py train and drive commands.
 DEFAULT_MODEL_TYPE = 'linear'   #(linear|categorical|rnn|imu|behavior|3d|localizer|latent)
-BATCH_SIZE = 64                #how many records to use when doing one pass of gradient decent. Use a smaller number if your gpu is running out of memory.
-TRAIN_TEST_SPLIT = 0.8          #what percent of records to use for training. the remaining used for validation.
+BATCH_SIZE = 128                #how many records to use when doing one pass of gradient decent. Use a smaller number if your gpu is running out of memory.
+TRAIN_TEST_SPLIT = 0.9          #what percent of records to use for training. the remaining used for validation.
 MAX_EPOCHS = 100                #how many times to visit all records of your data
 SHOW_PLOT = True                #would you like to see a pop up display of final loss?
 VERBOSE_TRAIN = True             #would you like to see a progress bar with text during training?
 USE_EARLY_STOP = True           #would you like to stop the training if we see it's not improving fit?
-EARLY_STOP_PATIENCE = 6         #how many epochs to wait before no improvement
+EARLY_STOP_PATIENCE = 8         #how many epochs to wait before no improvement
 MIN_DELTA = .0005               #early stop will want this much loss change before calling it improved.
 PRINT_MODEL_SUMMARY = True      #print layers and weights to stdout
 OPTIMIZER = None                #adam, sgd, rmsprop, etc.. None accepts default
