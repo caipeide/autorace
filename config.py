@@ -12,7 +12,6 @@ print(cfg.CAMERA_RESOLUTION)
 
 """
 
-
 import os
 
 #PATHS
@@ -30,6 +29,10 @@ IMAGE_W = 224
 IMAGE_H = 224
 IMAGE_DEPTH = 3         # default RGB=3, make 1 for mono
 CAMERA_FRAMERATE = DRIVE_LOOP_HZ
+
+# Region of interst cropping
+ROI_CROP_TOP = 0                    #the number of rows of pixels to ignore on the top of the image
+ROI_CROP_BOTTOM = 0                 #the number of rows of pixels to ignore on the bottom of the image
 
 #9865, over rides only if needed, ie. TX2..
 PCA9685_I2C_ADDR = 0x40     #I2C address, use i2cdetect to validate this number
@@ -59,21 +62,10 @@ DEFAULT_MODEL_TYPE = 'linear'   #(linear|categorical|rnn|imu|behavior|3d|localiz
 BATCH_SIZE = 128                #how many records to use when doing one pass of gradient decent. Use a smaller number if your gpu is running out of memory.
 TRAIN_TEST_SPLIT = 0.8          #what percent of records to use for training. the remaining used for validation.
 MAX_EPOCHS = 100                #how many times to visit all records of your data
-SHOW_PLOT = True                #would you like to see a pop up display of final loss?
-VERBOSE_TRAIN = True             #would you like to see a progress bar with text during training?
-USE_EARLY_STOP = True           #would you like to stop the training if we see it's not improving fit?
 EARLY_STOP_PATIENCE = 5         #how many epochs to wait before no improvement
 MIN_DELTA = .0005               #early stop will want this much loss change before calling it improved.
 PRINT_MODEL_SUMMARY = True      #print layers and weights to stdout
-OPTIMIZER = None                #adam, sgd, rmsprop, etc.. None accepts default
 LEARNING_RATE = 0.0001           #only used when OPTIMIZER specified
-LEARNING_RATE_DECAY = 0.0       #only used when OPTIMIZER specified
-SEND_BEST_MODEL_TO_PI = False   #change to true to automatically send best model during training
-CACHE_IMAGES = True             #keep images in memory. will speed succesive epochs, but crater if not enough mem.
-
-# Region of interst cropping
-ROI_CROP_TOP = 20                    #the number of rows of pixels to ignore on the top of the image
-ROI_CROP_BOTTOM = 10                 #the number of rows of pixels to ignore on the bottom of the image
 
 #WEB CONTROL
 WEB_CONTROL_PORT = 8887             # which port to listen on when making a web controller
@@ -99,4 +91,4 @@ SEQUENCE_LENGTH = 3             #some models use a number of images over time. T
 RECORD_DURING_AI = False        #normally we do not record during ai mode. Set this to true to get image and steering records for your Ai. Be careful not to use them to train.
 
 #Scale the output of the throttle of the ai pilot for all model types.
-AI_THROTTLE_MULT = 1.0              # this multiplier will scale every throttle value for all output from NN models
+AI_THROTTLE_MULT = 0.75              # this multiplier will scale every throttle value for all output from NN models

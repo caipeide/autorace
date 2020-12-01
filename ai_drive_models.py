@@ -36,7 +36,6 @@ class DriveClass:
         
 
     def update(self):
-        first_output = False
         while self.cam.running:
             # read the memory and compute
             img_arr = self.cam.run_threaded() # cv2, numpy array
@@ -71,11 +70,7 @@ class DriveClass:
 
             self.run_steering = run_steering
             self.run_throttle = run_throttle
-
-            if first_output == False:
-                print('######## 1st output, ready to switch mode ########')
-            first_output = True
-
+            
     def run(self, img_arr):
         if self.model_type == 'linear':
             # print(img_arr.shape) # 224, 224, 3

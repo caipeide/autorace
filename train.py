@@ -237,7 +237,8 @@ def start_train(cfg, tub_names, model_path, model_type, sequence_train = False):
     # --------------------------
     # 3. start to train
     # --------------------------
-    print(drive_model)
+    if cfg.PRINT_MODEL_SUMMARY:
+        print(drive_model)
     drive_model, train_loss, valid_loss = go_train(trainloader, validloader, device, optimizer, drive_model, writer, patience, cfg, model_path)
     
 
@@ -274,7 +275,7 @@ def go_train(trainloader, validloader, device, optimizer, drive_model, writer, p
     avg_valid_losses = [] 
     
     # initialize the early_stopping object
-    early_stopping = EarlyStopping(patience=patience, verbose=True, path=model_path)
+    early_stopping = EarlyStopping(patience=patience, verbose=True, path=model_path, delta=cfg.MIN_DELTA)
 
     start_epoch = 1
     for epoch in range(start_epoch, 1 + cfg.MAX_EPOCHS):
