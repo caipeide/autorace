@@ -21,6 +21,18 @@ class DriveClass:
         self.model_type = model_type
         self.img_seq = []
         self.seq_length = cfg.SEQUENCE_LENGTH
+        # initialize the deep network model, the first inference time is a bit slow
+        print('waiting for the camera image to warm up the network.')
+        while True:
+            img_arr = self.cam.run() # cv2, numpy array
+            time.sleep(0.5)
+            if img_arr is not None:
+                break 
+        print('warming up the deep network model...')
+        t0 = time.time()
+        # self.run(np.ones([cfg.IMAGE_H, cfg.IMAGE_W, cfg.IMAGE_DEPTH]).astype(np.uint8)*255)
+        self.run(img_arr)
+        print('network initialized, time cost: %.2f s'%(time.time()-t0))
         
 
     def update(self):

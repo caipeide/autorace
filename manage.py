@@ -36,17 +36,17 @@ def drive(cfg, model_path=None, use_joystick=False, use_trt = False, use_half = 
     # -------------------------------- 
     # 2. Add camera
     # -------------------------------- 
-    inputs = []
-    threaded = True
     cam = CSICamera(image_w=cfg.IMAGE_W, image_h=cfg.IMAGE_H, framerate=cfg.CAMERA_FRAMERATE, crop_top=cfg.ROI_CROP_TOP, crop_bottom=cfg.ROI_CROP_BOTTOM)
-    V.add(cam, inputs=inputs, outputs=['cam/image_array'], threaded=threaded)
+    V.add(cam, inputs=[], outputs=['cam/image_array'], threaded=True)
     if cfg.USE_FPV:
         V.add(WebFpv(), inputs=['cam/image_array'], threaded=True) # send the FPV image through network at port 8890
 
 
     # -------------------------------- 
     # 3. Add gamepad or webpage controller
-    # -------------------------------- 
+    # --------------------------------
+    if model_path:
+        cfg.WEB_INIT_MODE = "local"
     if use_joystick or cfg.USE_JOYSTICK_AS_DEFAULT:
         from donkeycar.parts.controller import get_js_controller
         ctr = get_js_controller(cfg)
@@ -70,6 +70,7 @@ def drive(cfg, model_path=None, use_joystick=False, use_trt = False, use_half = 
 
     if model_path:
         print('loading the self-driving model, model_path:', model_path)
+        t0 = time.time()
         import torch
         device = torch.device('cuda')
         if not use_trt:
@@ -86,7 +87,7 @@ def drive(cfg, model_path=None, use_joystick=False, use_trt = False, use_half = 
             from torch2trt import TRTModule
             drive_model = TRTModule()
             drive_model.load_state_dict(torch.load(model_path)) # no need to move to device if using torch2trt
-
+        print('model loaded, time cost: %.2f s'%(time.time()-t0))
         drive_class = DriveClass(cfg, model_type, drive_model, device, cam = cam, half = use_half)
         outputs=['pilot/angle', 'pilot/throttle']
         V.add(drive_class, inputs=['cam/image_array'],
@@ -127,12 +128,15 @@ def drive(cfg, model_path=None, use_joystick=False, use_trt = False, use_half = 
         ctr.set_tub(tub)
         ctr.print_controls()
 
-
-    # -------------------------------- 
-    # 9. run the vehicle for DRIVE_LOOP_HZ, e.g., 20 HZ
-    # -------------------------------- 
-    V.start(rate_hz=cfg.DRIVE_LOOP_HZ, max_loop_count=cfg.MAX_LOOPS)
-
+    # --------------------------------
+    # 9. press "Enter" to start if using AI mode, or else directly start the vehicle
+    # --------------------------------
+    if model_path:
+        enter = input("press ENTER to start racing")
+        if enter == '':
+            V.start(rate_hz=cfg.DRIVE_LOOP_HZ, max_loop_count=cfg.MAX_LOOPS) #run the vehicle for DRIVE_LOOP_HZ, e.g., 20 HZ
+    else:
+        V.start(rate_hz=cfg.DRIVE_LOOP_HZ, max_loop_count=cfg.MAX_LOOPS)
 
 if __name__ == '__main__':
     args = docopt(__doc__)
