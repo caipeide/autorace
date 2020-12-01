@@ -139,7 +139,8 @@ class LinearModel(nn.Module):
         )
 
     def forward(self, rgb):
-        x = self.layer_cnn(rgb)
+        x = self.layer_cnn(rgb) # batch, 512, 7,7
+        x = self.avgpool(x) # batch, 512, 1, 1
         x = torch.flatten(x, start_dim=2) # flatten to size of: batch_size*512
 
         steering = self.layer_steering(x)
