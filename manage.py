@@ -38,7 +38,7 @@ def drive(cfg, model_path=None, use_joystick=False, use_trt = False, use_half = 
     # -------------------------------- 
     inputs = []
     threaded = True
-    cam = CSICamera(image_w=cfg.IMAGE_W, image_h=cfg.IMAGE_H, framerate=cfg.CAMERA_FRAMERATE, gstreamer_flip=cfg.CSIC_CAM_GSTREAMER_FLIP_PARM)
+    cam = CSICamera(image_w=cfg.IMAGE_W, image_h=cfg.IMAGE_H, framerate=cfg.CAMERA_FRAMERATE, crop_top=cfg.ROI_CROP_TOP, crop_bottom=cfg.ROI_CROP_BOTTOM)
     V.add(cam, inputs=inputs, outputs=['cam/image_array'], threaded=threaded)
     if cfg.USE_FPV:
         V.add(WebFpv(), inputs=['cam/image_array'], threaded=True) # send the FPV image through network at port 8890

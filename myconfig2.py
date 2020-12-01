@@ -32,8 +32,6 @@ IMAGE_DEPTH = 3         # default RGB=3, make 1 for mono
 CAMERA_FRAMERATE = DRIVE_LOOP_HZ
 CAMERA_VFLIP = False
 CAMERA_HFLIP = False
-# For CSIC camera - If the camera is mounted in a rotated position, changing the below parameter will correct the output frame orientation
-CSIC_CAM_GSTREAMER_FLIP_PARM = 0 # (0 => none , 4 => Flip horizontally, 6 => Flip vertically)
 
 #9865, over rides only if needed, ie. TX2..
 PCA9685_I2C_ADDR = 0x40     #I2C address, use i2cdetect to validate this number
@@ -90,8 +88,8 @@ CACHE_IMAGES = True             #keep images in memory. will speed succesive epo
 # Region of interst cropping
 # only supported in Categorical and Linear models.
 # If these crops values are too large, they will cause the stride values to become negative and the model with not be valid.
-ROI_CROP_TOP = 0                    #the number of rows of pixels to ignore on the top of the image
-ROI_CROP_BOTTOM = 0                 #the number of rows of pixels to ignore on the bottom of the image
+ROI_CROP_TOP = 20                    #the number of rows of pixels to ignore on the top of the image
+ROI_CROP_BOTTOM = 10                 #the number of rows of pixels to ignore on the bottom of the image
 
 #WEB CONTROL
 WEB_CONTROL_PORT = 8887             # which port to listen on when making a web controller
