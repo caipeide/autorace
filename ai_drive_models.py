@@ -102,9 +102,55 @@ class DriveClass:
     def run_threaded(self, img_arr):
         return self.run_steering, self.run_throttle
 
+
 class LinearModel(nn.Module):
     def __init__(self):
         super(LinearModel, self).__init__()
+        # similar to the self-driving car model from Nvidia in 2016: https://developer.nvidia.com/blog/deep-learning-self-driving-cars/
+        self.layer_cnn = nn.Sequential(
+            nn.Conv2d(in_channels= 3, out_channels= 32, kernel_size=3, stride=2, padding=1), #size: 224-->112
+            nn.BatchNorm2d(32),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(in_channels= 32, out_channels= 64, kernel_size=3, stride=2, padding=1), #112-->56
+            nn.BatchNorm2d(64),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(in_channels= 64, out_channels= 128, kernel_size=3, stride=2, padding=1), #56-->28
+            nn.BatchNorm2d(128),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(in_channels= 128, out_channels= 256, kernel_size=3, stride=2, padding=1), #28-->14
+            nn.BatchNorm2d(256),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(in_channels= 256, out_channels= 512, kernel_size=3, stride=2, padding=1), #14-->7, final size: batch_size*512*7*7
+            nn.BatchNorm2d(512),
+            nn.ReLU(inplace=True)
+        )
+        self.avgpool = nn.AdaptiveAvgPool2d((1, 1)) # pooling, change the size to batch_size*512*1*1
+
+        self.layer_steering = nn.Sequential(
+                            nn.Linear(512, 256), nn.BatchNorm1d(256), nn.ReLU(True),
+                            nn.Linear(256, 128), nn.BatchNorm1d(128), nn.ReLU(True),
+                            nn.Linear(128, 1)
+        )
+
+        self.layer_throttle = nn.Sequential(
+                            nn.Linear(512, 256), nn.BatchNorm1d(256), nn.ReLU(True),
+                            nn.Linear(256, 128), nn.BatchNorm1d(128), nn.ReLU(True),
+                            nn.Linear(128, 1)
+        )
+
+    def forward(self, rgb):
+        x = self.layer_cnn(rgb)
+        x = torch.flatten(x, start_dim=1) # flatten to size of: batch_size*512
+
+        steering = self.layer_steering(x)
+        throttle = self.layer_throttle(x)
+
+        return steering[:,0], throttle[:,0]
+
+
+class LinearResModel(nn.Module):
+    def __init__(self):
+        super(LinearResModel, self).__init__()
         self.resnet_rgb = resnet18(pretrained=False)
         self.resnet_rgb.fc = nn.Sequential(
                             nn.Linear(512, 512), nn.BatchNorm1d(512), nn.ReLU(True))
