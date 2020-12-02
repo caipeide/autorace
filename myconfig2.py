@@ -66,6 +66,7 @@ STEERING_RIGHT_PWM = 290        #pwm value for full right steering
 # MIN_DELTA = .0005               #early stop will want this much loss change before calling it improved.
 # PRINT_MODEL_SUMMARY = True      #print layers and weights to stdout
 # LEARNING_RATE = 0.0001           #only used when OPTIMIZER specified
+# NUM_WORKERS = 6                 # Setting the argument num_workers as a positive integer will turn on multi-process data loading with the specified number of loader worker processes.
 
 # #WEB CONTROL
 # WEB_CONTROL_PORT = 8887             # which port to listen on when making a web controller

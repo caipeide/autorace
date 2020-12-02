@@ -165,7 +165,7 @@ def start_train(cfg, tub_names, model_path, model_type, sequence_train = False):
     if not sequence_train:
         
         from DataLoader import load_split_train_valid
-        trainloader, validloader = load_split_train_valid(cfg, gen_records, num_workers=2)
+        trainloader, validloader = load_split_train_valid(cfg, gen_records, num_workers=cfg.NUM_WORKERS)
         print(len(trainloader), len(validloader))
     else:
         print('collating sequences based on the records ...')
@@ -206,7 +206,7 @@ def start_train(cfg, tub_names, model_path, model_type, sequence_train = False):
         # remainder of the original list is the validation set
         val_data_list = sequences
         from DataLoader_sequence import load_split_train_valid
-        trainloader, validloader = load_split_train_valid(cfg, train_data_list, val_data_list, num_workers=2)
+        trainloader, validloader = load_split_train_valid(cfg, train_data_list, val_data_list, num_workers=cfg.NUM_WORKERS)
         print(len(trainloader), len(validloader))
 
     if len(trainloader) < 2:
