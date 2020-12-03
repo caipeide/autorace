@@ -12,7 +12,7 @@ Options:
                                [default: myconfig.py]
 """
 import torch
-from ai_drive_models import LinearModel, RNNModel
+from ai_drive_models import LinearModel, RNNModel, LinearResModel
 from torch2trt import torch2trt
 from docopt import docopt
 import os
@@ -23,8 +23,11 @@ def accel_torch_model(cfg, model_type, model_path = './', use_half = False):
     
     # load the original model
     device = torch.device('cuda')
-    if model_type == 'linear':
-        drive_model = LinearModel().to(device)
+    if model_type == 'linear' or model_type == 'resnet18':
+        if model_type == 'linear':
+            drive_model = LinearModel().to(device)
+        elif model_type == 'resnet18':
+            drive_model = LinearResModel().to(device)
         data = torch.zeros((1, 3, 224, 224)).cuda()
     elif model_type == 'rnn':
         drive_model = RNNModel().to(device)

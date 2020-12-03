@@ -3,8 +3,8 @@
 Scripts to drive a donkey 2 car
 
 Usage:
-    manage.py (drive) [--model=<model>] [--js] [--type=(linear|categorical|rnn|imu|behavior|3d|localizer|latent)] [--myconfig=<filename>] [--trt] [--half]
-    manage.py (train) [--tub=<tub1,tub2,..tubn>] [--file=<file> ...] (--model=<model>) [--type=(linear|categorical|rnn|imu|behavior|3d|localizer)] [--continuous] [--aug] [--myconfig=<filename>]
+    manage.py (drive) [--model=<model>] [--js] [--type=(linear|rnn|resnet18)] [--myconfig=<filename>] [--trt] [--half]
+    manage.py (train) [--tub=<tub1,tub2,..tubn>] [--file=<file> ...] (--model=<model>) [--type=(linear|rnn|resnet18)] [--continuous] [--aug] [--myconfig=<filename>]
 
 
 Options:
@@ -23,7 +23,7 @@ from donkeycar.parts.controller import LocalWebController, JoystickController, W
 # from donkeycar.utils import *
 from tools import *
 from donkeycar.parts.camera import CSICamera
-from ai_drive_models import LinearModel, DriveClass, RNNModel
+from ai_drive_models import LinearModel, DriveClass, RNNModel, LinearResModel
             
 def drive(cfg, model_path=None, use_joystick=False, use_trt = False, use_half = False, model_type=None):
 
@@ -76,6 +76,8 @@ def drive(cfg, model_path=None, use_joystick=False, use_trt = False, use_half = 
         if not use_trt:
             if model_type == 'linear':
                 drive_model = LinearModel().to(device)
+            elif model_type == 'resnet18':
+                drive_model = LinearResModel().to(device)
             elif model_type == 'rnn':
                 drive_model = RNNModel().to(device)
             drive_model.load_state_dict(torch.load(model_path,map_location=lambda storage, loc: storage))

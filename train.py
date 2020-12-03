@@ -24,7 +24,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms, utils
-from ai_drive_models import LinearModel, RNNModel
+from ai_drive_models import LinearModel, RNNModel, LinearResModel
 from torch.utils.tensorboard import SummaryWriter
 import matplotlib.pyplot as plt
 
@@ -220,6 +220,9 @@ def start_train(cfg, tub_names, model_path, model_type, sequence_train = False):
     if model_type == 'linear':
         drive_model = LinearModel()
         print('linear model created')
+    elif model_type == 'resnet18':
+        drive_model = LinearResModel()
+        print('resnet18 model created')
     elif model_type == 'rnn':
         drive_model = RNNModel()
         print('rnn model created')
