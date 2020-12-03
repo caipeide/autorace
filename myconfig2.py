@@ -92,4 +92,4 @@ STEERING_RIGHT_PWM = 290        #pwm value for full right steering
 # RECORD_DURING_AI = False        #normally we do not record during ai mode. Set this to true to get image and steering records for your Ai. Be careful not to use them to train.
 
 # #Scale the output of the throttle of the ai pilot for all model types.
-# AI_THROTTLE_MULT = 0.75              # this multiplier will scale every throttle value for all output from NN models
+# AI_THROTTLE_MULT = 1.0              # this multiplier will scale every throttle value for all output from NN models
