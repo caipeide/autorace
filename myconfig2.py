@@ -31,8 +31,8 @@
 # CAMERA_FRAMERATE = DRIVE_LOOP_HZ
 
 # # Region of interst cropping
-# ROI_CROP_TOP = 0                    #the number of rows of pixels to ignore on the top of the image
-# ROI_CROP_BOTTOM = 0                 #the number of rows of pixels to ignore on the bottom of the image
+ROI_CROP_TOP = 35                    #the number of rows of pixels to ignore on the top of the image
+ROI_CROP_BOTTOM = 10                 #the number of rows of pixels to ignore on the bottom of the image
 
 # #9865, over rides only if needed, ie. TX2..
 # PCA9685_I2C_ADDR = 0x40     #I2C address, use i2cdetect to validate this number
