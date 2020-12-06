@@ -21,6 +21,7 @@ def add_basic_modules(V, cfg):
     V.add(PilotCondition(), inputs=['user/mode'], outputs=['run_pilot'])
     rec_tracker_part = RecordTracker(cfg=cfg)
     V.add(rec_tracker_part, inputs=["tub/num_records"], outputs=[])
+    V.add(AiRunCondition(), inputs=['user/mode'], outputs=['ai_running'])
 
     return V
 
