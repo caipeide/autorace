@@ -49,7 +49,11 @@ class SelfDriveDataset(Dataset):
 def load_split_train_valid(cfg, collate_records_dict_dict, num_workers=2):
 
     batch_size = cfg.BATCH_SIZE
-    train_transforms = transforms.Compose([transforms.ColorJitter(brightness=0.5, contrast=0.3, saturation=0.3, hue=0.3)])  # add image noise later...
+    if cfg.COLOR_JITTER_TRANSFORMS:
+        train_transforms = transforms.Compose([transforms.ColorJitter(brightness=0.5, contrast=0.3, saturation=0.3, hue=0.3)])  # add image noise later...
+        print('using COLOR_JITTER_TRANSFORMS during training...')
+    else:
+        train_transforms = None
 
     # new_records now contains all our NEW samples
     # - set a random selection to be the training samples based on the ratio in CFG file

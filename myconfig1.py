@@ -67,6 +67,7 @@ STEERING_RIGHT_PWM = 265        #pwm value for full right steering
 # PRINT_MODEL_SUMMARY = True      #print layers and weights to stdout
 # LEARNING_RATE = 0.0001           #only used when OPTIMIZER specified
 # NUM_WORKERS = 8                 # Setting the argument num_workers as a positive integer will turn on multi-process data loading with the specified number of loader worker processes.
+# COLOR_JITTER_TRANSFORMS = True  #weather to add color noise (brightness, contrast, ...) during training.
 
 # #WEB CONTROL
 # WEB_CONTROL_PORT = 8887             # which port to listen on when making a web controller
