@@ -4,7 +4,7 @@ Scripts to drive a donkey 2 car
 
 Usage:
     manage.py (drive) [--model=<model>] [--js] [--type=(linear|rnn|resnet18)] [--myconfig=<filename>] [--trt] [--half]
-    manage.py (train) [--tub=<tub1,tub2,..tubn>] [--file=<file> ...] (--model=<model>) [--type=(linear|rnn|resnet18)] [--continuous] [--aug] [--myconfig=<filename>]
+    manage.py (train) [--tub=<tub1,tub2,..tubn>] [--file=<file> ...] (--model=<model>) [--type=(linear|rnn|resnet18)] [--continuous] [--aug] [--myconfig=<filename>] [--pretrain=<pretrain_model>]
 
 
 Options:
@@ -160,11 +160,12 @@ if __name__ == '__main__':
 
         tub = args['--tub']
         model = args['--model']
+        pretrain = args['--pretrain']
         dirs = preprocessFileList(args['--file'])
 
         if tub is not None:
             tub_paths = [os.path.expanduser(n) for n in tub.split(',')]
             dirs.extend( tub_paths )
 
-        multi_train(cfg, dirs, model, model_type)
+        multi_train(cfg, dirs, model, model_type, pretrain)
 

@@ -141,7 +141,7 @@ class EarlyStopping:
         self.val_loss_min = val_loss
 
 
-def start_train(cfg, tub_names, model_path, model_type, sequence_train = False):
+def start_train(cfg, tub_names, model_path, model_type, pretrain_path, sequence_train = False):
     # ref: https://github.com/Bjarten/early-stopping-pytorch/blob/master/MNIST_Early_Stopping_example.ipynb
     '''
     use the specified data in tub_names to train an artifical neural network
@@ -226,6 +226,12 @@ def start_train(cfg, tub_names, model_path, model_type, sequence_train = False):
     elif model_type == 'rnn':
         drive_model = RNNModel()
         print('rnn model created')
+    # load the pre-trained model if specified
+    if pretrain_path:
+        print('loading the pretrained model from path: ', pretrain_path)
+        t0 = time.time()
+        drive_model.load_state_dict(torch.load(pretrain_path,map_location=lambda storage, loc: storage))
+        print('pretrained model loaded, time cost: %.5f s'%(time.time()-t0))
     drive_model = drive_model.to(device)
     path_tensorboard = os.path.dirname(model_path) + '/' + os.path.basename(model_path).split('.')[0]
     if os.path.exists(path_tensorboard):
@@ -364,7 +370,7 @@ def go_train(trainloader, validloader, device, optimizer, drive_model, writer, p
 
     return drive_model, avg_train_losses, avg_valid_losses
 
-def multi_train(cfg, tub, model, model_type):
+def multi_train(cfg, tub, model, model_type, pretrain_path):
     '''
     choose the right regime for the given model type
     '''
@@ -372,7 +378,7 @@ def multi_train(cfg, tub, model, model_type):
     if model_type in ("rnn",'3d','look_ahead'):
         sequence_train = True
 
-    start_train(cfg, tub, model, model_type, sequence_train = sequence_train)
+    start_train(cfg, tub, model, model_type, pretrain_path, sequence_train = sequence_train)
 
     
 def removeComments( dir_list ):
