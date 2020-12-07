@@ -24,6 +24,7 @@ from donkeycar.parts.controller import LocalWebController, JoystickController, W
 from tools import *
 from donkeycar.parts.camera import CSICamera
 from ai_drive_models import LinearModel, DriveClass, RNNModel, LinearResModel
+from uwb_tools import UWBClass
             
 def drive(cfg, model_path=None, use_joystick=False, use_trt = False, use_half = False, model_type=None):
 
@@ -40,6 +41,27 @@ def drive(cfg, model_path=None, use_joystick=False, use_trt = False, use_half = 
     V.add(cam, inputs=[], outputs=['cam/image_array'], threaded=True)
     if cfg.USE_FPV:
         V.add(WebFpv(), inputs=['cam/image_array'], threaded=True) # send the FPV image through network at port 8890
+
+    # -------------------------------- 
+    # 2.5 Add UWB function, which can provide:
+    #     -- velocity: v_x, v_y, v_z
+    #     -- angular velocity: av_x, av_y, av_z
+    #     -- acceleration: a_x, a_y, a_z
+    #     << -------------------------------- >> THE FOLLOWING MAY NOT BE USED, BUT WE STILL RECORD THEM.
+    #     -- position: x, y, z
+    #     -- orientation: o_x, o_y, o_z
+    #     -- pose uncertainty: u_x, u_y, u_z
+    # -------------------------------- 
+
+    if cfg.HAVE_UWB:
+        uwb = UWBClass(cfg, cam)
+        V.add(uwb, inputs=[], outputs=[
+            'imu/acl_x', 'imu/acl_y', 'imu/acl_z', # m/s^2
+            'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z', # rad/s
+            'uwb/vel_x', 'uwb/vel_y', 'uwb/vel_z', # m/s
+            'uwb/pose_x', 'uwb/pose_y', 'uwb/pose_z', # m 
+            'uwb/pose_unc_x', 'uwb/pose_unc_y', 'uwb/pose_unc_z', #m
+            'uwb/ori_x', 'uwb/ori_y', 'uwb/ori_z', 'uwb/tag_id', 'uwb/voltage'], threaded=True) #degree, None, V
 
 
     # -------------------------------- 

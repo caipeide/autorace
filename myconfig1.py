@@ -30,6 +30,11 @@
 # IMAGE_DEPTH = 3         # default RGB=3, make 1 for mono
 # CAMERA_FRAMERATE = DRIVE_LOOP_HZ
 
+#UWB
+# HAVE_UWB = True
+# SERIAL_PORT = '/dev/ttyUSB0'
+# BAUD_RATE = 921600
+
 # # Region of interst cropping
 # ROI_CROP_TOP = 0                    #the number of rows of pixels to ignore on the top of the image
 # ROI_CROP_BOTTOM = 0                 #the number of rows of pixels to ignore on the bottom of the image

@@ -33,6 +33,23 @@ def add_tub_save_data(V, cfg):
     types=['image_array',
            'float', 'float',
            'str']
+    
+    if cfg.HAVE_UWB:
+        inputs += [
+            'imu/acl_x', 'imu/acl_y', 'imu/acl_z',
+            'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z',
+            'uwb/vel_x', 'uwb/vel_y', 'uwb/vel_z',
+            'uwb/pose_x', 'uwb/pose_y', 'uwb/pose_z',
+            'uwb/pose_unc_x', 'uwb/pose_unc_y', 'uwb/pose_unc_z',
+            'uwb/ori_x', 'uwb/ori_y', 'uwb/ori_z', 'uwb/tag_id', 'uwb/voltage']
+
+        types +=[
+            'float', 'float', 'float',
+            'float', 'float', 'float',
+            'float', 'float', 'float',
+            'float', 'float', 'float',
+            'float', 'float', 'float',
+            'float', 'float', 'float','float', 'float']
 
     if cfg.RECORD_DURING_AI:
         inputs += ['pilot/angle', 'pilot/throttle']
