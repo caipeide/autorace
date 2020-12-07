@@ -3,7 +3,7 @@
 Scripts to accelerate a normal pytorch model
 
 Usage:
-    accel_model.py (--model=<model>) [--half] (--type=(linear|rnn|resnet18|resnet18_imu)) [--myconfig=<filename>]
+    accel_model.py (--model=<model>) [--half] (--type=<>) [--myconfig=<filename>]
 
 Options:
     -h --help                  Show this screen.
@@ -35,7 +35,7 @@ def accel_torch_model(cfg, model_type, model_path = './', use_half = False):
         data = [torch.zeros((1, seq_length, 3, 224, 224)).cuda()]
     elif model_type == 'resnet18_imu':
         drive_model = LinearResIMUModel().to(device)
-        data = [torch.zeros((1, 3, 224, 224)).cuda()] + [torch.zeros((1, 9)).cuda()]
+        data = [torch.zeros((1, 3, 224, 224)).cuda()] + [torch.zeros((1, 7)).cuda()]
     
     drive_model.eval()
     if use_half:
