@@ -41,7 +41,7 @@ class SelfDriveDataset(Dataset):
                 'steering': torch.from_numpy(future_steer).float(),
                 'throttle': torch.from_numpy(future_throttle).float()}
                     
-        if 'imu' in model_type:
+        if 'imu' in self.model_type:
             # prepare the imu data
             acl_x = this_data['acl_x']
             acl_y = this_data['acl_y']
@@ -64,7 +64,7 @@ class SelfDriveDataset(Dataset):
         return sample
 
     
-def load_split_train_valid(cfg, model_type, collate_records_dict_dict, num_workers=2):
+def load_split_train_valid(model_type, cfg, collate_records_dict_dict, num_workers=2):
 
     batch_size = cfg.BATCH_SIZE
     if cfg.COLOR_JITTER_TRANSFORMS:
