@@ -3,8 +3,8 @@
 Scripts to drive a donkey 2 car
 
 Usage:
-    manage.py (drive) [--model=<model>] [--js] [--type=(linear|rnn|resnet18)] [--myconfig=<filename>] [--trt] [--half]
-    manage.py (train) [--tub=<tub1,tub2,..tubn>] [--file=<file> ...] (--model=<model>) [--type=(linear|rnn|resnet18)] [--continuous] [--aug] [--myconfig=<filename>] [--pretrain=<pretrain_model>]
+    manage.py (drive) [--model=<model>] [--js] [--type=(linear|rnn|resnet18|resnet18_imu)] [--myconfig=<filename>] [--trt] [--half]
+    manage.py (train) [--tub=<tub1,tub2,..tubn>] [--file=<file> ...] (--model=<model>) [--type=(linear|rnn|resnet18|resnet18_imu)] [--continuous] [--aug] [--myconfig=<filename>] [--pretrain=<pretrain_model>]
 
 
 Options:
@@ -23,7 +23,7 @@ from donkeycar.parts.controller import LocalWebController, JoystickController, W
 # from donkeycar.utils import *
 from tools import *
 from donkeycar.parts.camera import CSICamera
-from ai_drive_models import LinearModel, DriveClass, RNNModel, LinearResModel
+from ai_drive_models import LinearModel, DriveClass, DriveIMUClass, RNNModel, LinearResModel, LinearResIMUModel
 from uwb_tools import UWBClass
             
 def drive(cfg, model_path=None, use_joystick=False, use_trt = False, use_half = False, model_type=None):
@@ -89,7 +89,12 @@ def drive(cfg, model_path=None, use_joystick=False, use_trt = False, use_half = 
     # -------------------------------- 
     # 4. Configure the AI neural network model
     # --------------------------------
-
+    model_inputs = ['cam/image_array']
+    if 'imu' in model_type:
+        model_inputs.extend([
+            'imu/acl_x', 'imu/acl_y', 'imu/acl_z',
+            'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z',
+            'uwb/vel_x', 'uwb/vel_y', 'uwb/vel_z'])
     if model_path:
         print('loading the self-driving model, model_path:', model_path)
         t0 = time.time()
@@ -102,6 +107,8 @@ def drive(cfg, model_path=None, use_joystick=False, use_trt = False, use_half = 
                 drive_model = LinearResModel().to(device)
             elif model_type == 'rnn':
                 drive_model = RNNModel().to(device)
+            elif model_type == 'resnet18_imu':
+                drive_model = LinearResIMUModel().to(device)
             drive_model.load_state_dict(torch.load(model_path,map_location=lambda storage, loc: storage))
             if use_half:
                 drive_model.eval().half()
@@ -112,9 +119,14 @@ def drive(cfg, model_path=None, use_joystick=False, use_trt = False, use_half = 
             drive_model = TRTModule()
             drive_model.load_state_dict(torch.load(model_path)) # no need to move to device if using torch2trt
         print('model loaded, time cost: %.2f s'%(time.time()-t0))
-        drive_class = DriveClass(cfg, model_type, drive_model, device, cam = cam, half = use_half)
+        
+        if 'imu' not in model_type:
+            drive_class = DriveClass(cfg, model_type, drive_model, device, cam = cam, half = use_half)
+        else:
+            drive_class = DriveIMUClass(cfg, model_type, drive_model, device, cam = cam, half = use_half)
+        
         outputs=['pilot/angle', 'pilot/throttle']
-        V.add(drive_class, inputs=['cam/image_array'],
+        V.add(drive_class, inputs=model_inputs,
             outputs=outputs,
             run_condition='run_pilot', threaded=False)
             # if use threaded mode, the input image will not be used, 

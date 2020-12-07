@@ -24,7 +24,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms, utils
-from ai_drive_models import LinearModel, RNNModel, LinearResModel
+from ai_drive_models import LinearModel, RNNModel, LinearResModel, LinearResIMUModel
 from torch.utils.tensorboard import SummaryWriter
 import matplotlib.pyplot as plt
 
@@ -41,7 +41,7 @@ def make_next_key(sample, index_offset):
     return tub_path + str(index)
 
 
-def collate_records(records, gen_records):
+def collate_records(model_type, records, gen_records):
     '''
     open all the .json records from records list passed in,
     read their contents,
@@ -81,8 +81,30 @@ def collate_records(records, gen_records):
         sample['angle'] = angle
         sample['throttle'] = throttle
 
-        # # Initialise 'train' to False
-        # sample['train'] = False
+        if 'imu' in model_type:
+            acl_x = float(json_data['imu/acl_x'])
+            acl_y = float(json_data['imu/acl_y'])
+            acl_z = float(json_data['imu/acl_z'])
+
+            gyr_x = float(json_data['imu/gyr_x'])
+            gyr_y = float(json_data['imu/gyr_y'])
+            gyr_z = float(json_data['imu/gyr_z'])
+
+            vel_x = float(json_data['uwb/vel_x'])
+            vel_y = float(json_data['uwb/vel_y'])
+            vel_z = float(json_data['uwb/vel_z'])
+
+            sample['acl_x'] = acl_x
+            sample['acl_y'] = acl_y
+            sample['acl_z'] = acl_z
+
+            sample['gyr_x'] = gyr_x
+            sample['gyr_y'] = gyr_y
+            sample['gyr_z'] = gyr_z
+
+            sample['vel_x'] = vel_x
+            sample['vel_y'] = vel_y
+            sample['vel_z'] = vel_z
         
         # We need to maintain the correct train - validate ratio across the dataset, even if continous training
         # so don't add this sample to the main records list (gen_records) yet.
@@ -160,12 +182,12 @@ def start_train(cfg, tub_names, model_path, model_type, pretrain_path, sequence_
     
     print('collating %d records ...' % (len(records)))
     gen_records = {}
-    collate_records(records, gen_records)
+    collate_records(model_type, records, gen_records)
 
     if not sequence_train:
         
         from DataLoader import load_split_train_valid
-        trainloader, validloader = load_split_train_valid(cfg, gen_records, num_workers=cfg.NUM_WORKERS)
+        trainloader, validloader = load_split_train_valid(model_type, cfg, gen_records, num_workers=cfg.NUM_WORKERS)
         print(len(trainloader), len(validloader))
     else:
         print('collating sequences based on the records ...')
@@ -226,6 +248,9 @@ def start_train(cfg, tub_names, model_path, model_type, pretrain_path, sequence_
     elif model_type == 'rnn':
         drive_model = RNNModel()
         print('rnn model created')
+    elif model_type == 'resnet18_imu':
+        drive_model = LinearResIMUModel()
+        print('resnet18_imu model created')
     # load the pre-trained model if specified
     if pretrain_path:
         print('loading the pretrained model from path: ', pretrain_path)
@@ -248,7 +273,7 @@ def start_train(cfg, tub_names, model_path, model_type, pretrain_path, sequence_
     # --------------------------
     if cfg.PRINT_MODEL_SUMMARY:
         print(drive_model)
-    drive_model, train_loss, valid_loss = go_train(trainloader, validloader, device, optimizer, drive_model, writer, patience, cfg, model_path)
+    drive_model, train_loss, valid_loss = go_train(model_type, trainloader, validloader, device, optimizer, drive_model, writer, patience, cfg, model_path)
     
 
     # --------------------------
@@ -273,7 +298,7 @@ def start_train(cfg, tub_names, model_path, model_type, pretrain_path, sequence_
     plt.show()
     fig.savefig(os.path.dirname(model_path) + '/loss_plot_' + os.path.basename(model_path).split('.')[0] + '.png', bbox_inches='tight')
 
-def go_train(trainloader, validloader, device, optimizer, drive_model, writer, patience, cfg, model_path):
+def go_train(model_type, trainloader, validloader, device, optimizer, drive_model, writer, patience, cfg, model_path):
     # to track the training loss as the model trains
     train_losses = []
     # to track the validation loss as the model trains
@@ -291,13 +316,16 @@ def go_train(trainloader, validloader, device, optimizer, drive_model, writer, p
         drive_model.train()
 
         for i, sample_batch in enumerate(trainloader):
+            optimizer.zero_grad()
+
             rgb = sample_batch['rgb'].to(device)
             steering = sample_batch['steering'].to(device)
             throttle = sample_batch['throttle'].to(device)
-
-            optimizer.zero_grad()
-
-            net_steering, net_throttle = drive_model(rgb)
+            if 'imu' in model_type:
+                imu_vector = sample_batch['imu_vector'].to(device)
+                net_steering, net_throttle = drive_model(rgb, imu_vector)
+            else:
+                net_steering, net_throttle = drive_model(rgb)
 
             loss_steer = F.mse_loss(net_steering, steering)
             loss_throttle = F.mse_loss(net_throttle, throttle)
@@ -323,8 +351,11 @@ def go_train(trainloader, validloader, device, optimizer, drive_model, writer, p
                 rgb = sample_batch['rgb'].to(device)
                 steering = sample_batch['steering'].to(device)
                 throttle = sample_batch['throttle'].to(device)
-
-                net_steering, net_throttle = drive_model(rgb)
+                if 'imu' in model_type:
+                    imu_vector = sample_batch['imu_vector'].to(device)
+                    net_steering, net_throttle = drive_model(rgb, imu_vector)
+                else:
+                    net_steering, net_throttle = drive_model(rgb)
 
                 loss_steer = F.mse_loss(net_steering, steering)
                 loss_throttle = F.mse_loss(net_throttle, throttle)

@@ -3,7 +3,7 @@
 Scripts to accelerate a normal pytorch model
 
 Usage:
-    accel_model.py (--model=<model>) [--half] (--type=<>) [--myconfig=<filename>]
+    accel_model.py (--model=<model>) [--half] (--type=(linear|rnn|resnet18|resnet18_imu)) [--myconfig=<filename>]
 
 Options:
     -h --help                  Show this screen.
@@ -12,7 +12,7 @@ Options:
                                [default: myconfig.py]
 """
 import torch
-from ai_drive_models import LinearModel, RNNModel, LinearResModel
+from ai_drive_models import LinearModel, RNNModel, LinearResModel, LinearResIMUModel
 from torch2trt import torch2trt
 from docopt import docopt
 import os
@@ -28,11 +28,14 @@ def accel_torch_model(cfg, model_type, model_path = './', use_half = False):
             drive_model = LinearModel().to(device)
         elif model_type == 'resnet18':
             drive_model = LinearResModel().to(device)
-        data = torch.zeros((1, 3, 224, 224)).cuda()
+        data = [torch.zeros((1, 3, 224, 224)).cuda()]
     elif model_type == 'rnn':
         drive_model = RNNModel().to(device)
         seq_length = cfg.SEQUENCE_LENGTH
-        data = torch.zeros((1, seq_length, 3, 224, 224)).cuda()
+        data = [torch.zeros((1, seq_length, 3, 224, 224)).cuda()]
+    elif model_type == 'resnet18_imu':
+        drive_model = LinearResIMUModel().to(device)
+        data = [torch.zeros((1, 3, 224, 224)).cuda()] + [torch.zeros((1, 9)).cuda()]
     
     drive_model.eval()
     if use_half:
@@ -41,7 +44,7 @@ def accel_torch_model(cfg, model_type, model_path = './', use_half = False):
 
     drive_model.load_state_dict(torch.load(model_path,map_location=lambda storage, loc: storage))
     # start to compress
-    model_trt = torch2trt(drive_model, [data], fp16_mode=use_half)
+    model_trt = torch2trt(drive_model, data, fp16_mode=use_half)
     if use_half:
         new_path = os.path.join(os.path.dirname(model_path), os.path.basename(model_path).split('.')[0]+'_trt_half.pth')
     else:

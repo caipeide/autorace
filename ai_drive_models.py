@@ -41,8 +41,7 @@ class DriveClass:
             img_arr = self.cam.run_threaded() # cv2, numpy array
             if img_arr is None:
                 continue
-            
-            if self.model_type == 'linear':
+            if self.model_type == 'linear' or self.model_type == 'resnet18':
                 # print(img_arr.shape) # 224, 224, 3
                 img_arr = Image.fromarray(img_arr)
                 if self.half:
@@ -72,7 +71,7 @@ class DriveClass:
             self.run_throttle = run_throttle
             
     def run(self, img_arr):
-        if self.model_type == 'linear':
+        if self.model_type == 'linear' or self.model_type == 'resnet18':
             # print(img_arr.shape) # 224, 224, 3
             img_arr = Image.fromarray(img_arr)
             if self.half:
@@ -94,6 +93,96 @@ class DriveClass:
             rgbs = torch.unsqueeze(rgbs, 0).to(self.device)
             run_steering, run_throttle = self.drive_model(rgbs)
            
+        
+        run_steering = float(run_steering.detach().cpu().numpy())
+        run_throttle = float(run_throttle.detach().cpu().numpy())
+        return run_steering, run_throttle
+    
+    def run_threaded(self, img_arr):
+        return self.run_steering, self.run_throttle
+
+
+
+class DriveIMUClass:
+    # used for inference, with the ai-drive-model packed.
+    def __init__(self, cfg, model_type, drive_model, device, cam = None, half = False):
+
+        self.drive_model = drive_model
+        self.run_steering = 0.0
+        self.run_throttle = 0.0
+        self.cam = cam
+        self.device = device
+        self.half = half
+        self.model_type = model_type
+        self.img_seq = []
+        self.seq_length = cfg.SEQUENCE_LENGTH
+        # initialize the deep network model, the first inference time is a bit slow
+        print('waiting for the camera image to warm up the network.')
+        while True:
+            img_arr = self.cam.run() # cv2, numpy array
+            time.sleep(0.5)
+            if img_arr is not None:
+                break 
+        print('warming up the deep network model...')
+        t0 = time.time()
+        # self.run(np.ones([cfg.IMAGE_H, cfg.IMAGE_W, cfg.IMAGE_DEPTH]).astype(np.uint8)*255)
+        self.run(img_arr)
+        print('network initialized, time cost: %.2f s'%(time.time()-t0))
+        
+
+    def update(self):
+        while self.cam.running:
+            # read the memory and compute
+            img_arr = self.cam.run_threaded() # cv2, numpy array
+            if img_arr is None:
+                continue
+            if self.model_type == 'linear' or self.model_type == 'resnet18':
+                # print(img_arr.shape) # 224, 224, 3
+                img_arr = Image.fromarray(img_arr)
+                if self.half:
+                    img_arr = transforms.ToTensor()(img_arr).half()
+                else:
+                    img_arr = transforms.ToTensor()(img_arr)
+                img_arr = torch.unsqueeze(img_arr, 0).to(self.device)
+                run_steering, run_throttle = self.drive_model(img_arr)
+            elif self.model_type == 'rnn':
+                while len(self.img_seq) < self.seq_length:
+                    self.img_seq.append(Image.fromarray(img_arr))
+
+                self.img_seq = self.img_seq[1:]
+                self.img_seq.append(Image.fromarray(img_arr))
+                
+                rgbs = torch.stack( [transforms.ToTensor()(self.img_seq[k]) for k in range(self.seq_length)], dim=0 )
+                if self.half:
+                    rgbs = rgbs.half()
+                rgbs = torch.unsqueeze(rgbs, 0).to(self.device)
+                run_steering, run_throttle = self.drive_model(rgbs)
+            
+            
+            run_steering = float(run_steering.detach().cpu().numpy())
+            run_throttle = float(run_throttle.detach().cpu().numpy())
+
+            self.run_steering = run_steering
+            self.run_throttle = run_throttle
+            
+    
+    def run(self, img_arr, acl_x = 0, acl_y = 0, acl_z = 0, gyr_x = 0, gyr_y = 0, gyr_z = 0, vel_x = 0, vel_y = 0, vel_z = 0 ):
+        # imu info
+        vel = np.sqrt(vel_x**2 + vel_y**2)
+        imu_vector = torch.tensor([acl_x, acl_y, acl_z, gyr_x, gyr_y, gyr_z, vel]).float()
+        # image
+        img_arr = Image.fromarray(img_arr)
+        # half
+        if self.half:
+            img_arr = transforms.ToTensor()(img_arr).half()
+            imu_vector = imu_vector.half()
+        else:
+            img_arr = transforms.ToTensor()(img_arr)
+        # to device
+        img_arr = torch.unsqueeze(img_arr, 0).to(self.device)
+        imu_vector = torch.unsqueeze(imu_vector, 0).to(self.device)
+
+        run_steering, run_throttle = self.drive_model(img_arr, imu_vector)           
         
         run_steering = float(run_steering.detach().cpu().numpy())
         run_throttle = float(run_throttle.detach().cpu().numpy())
@@ -169,6 +258,43 @@ class LinearResModel(nn.Module):
 
     def forward(self, rgb):
         x = self.resnet_rgb(rgb)
+
+        steering = self.layer_steering(x)
+        throttle = self.layer_throttle(x)
+
+        return steering[:,0], throttle[:,0]
+
+
+class LinearResIMUModel(nn.Module):
+    def __init__(self):
+        super(LinearResIMUModel, self).__init__()
+        self.resnet_rgb = resnet18(pretrained=False)
+        self.resnet_rgb.fc = nn.Sequential(
+                            nn.Linear(512, 512), nn.BatchNorm1d(512), nn.ReLU(True))
+
+        self.layer_steering = nn.Sequential(
+                            nn.Linear(512+128, 256), nn.BatchNorm1d(256), nn.ReLU(True),
+                            nn.Linear(256, 128), nn.BatchNorm1d(128), nn.ReLU(True),
+                            nn.Linear(128, 1)
+        )
+
+        self.layer_throttle = nn.Sequential(
+                            nn.Linear(512+128, 256), nn.BatchNorm1d(256), nn.ReLU(True),
+                            nn.Linear(256, 128), nn.BatchNorm1d(128), nn.ReLU(True),
+                            nn.Linear(128, 1)
+        )
+
+        self.layer_imu = nn.Sequential(
+                            nn.Linear(7, 128), nn.BatchNorm1d(128), nn.ReLU(True),
+                            nn.Linear(128, 256), nn.BatchNorm1d(256), nn.ReLU(True),
+                            nn.Linear(256, 128), nn.BatchNorm1d(128), nn.ReLU(True)
+        )
+
+    def forward(self, rgb, imu_vector): # 7-D : 'imu/acl_x', 'imu/acl_y', 'imu/acl_z', 'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z', speed
+        x = self.resnet_rgb(rgb)
+        x_imu = self.layer_imu(imu_vector)
+
+        x = torch.cat((x, x_imu), dim=1) # batch, 512 + 128
 
         steering = self.layer_steering(x)
         throttle = self.layer_throttle(x)
