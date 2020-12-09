@@ -6,6 +6,8 @@ import time
 from donkeycar.parts.throttle_filter import ThrottleFilter
 from donkeycar.parts.datastore import TubHandler
 from donkeycar.parts.actuator import PCA9685, PWMSteering, PWMThrottle
+from pid_controller.pid import PID
+import numpy as np
 
 def add_basic_modules(V, cfg):
 
@@ -15,7 +17,7 @@ def add_basic_modules(V, cfg):
 
     # this throttle filter will allow one tap back for esc reverse
     th_filter = ThrottleFilter()
-    V.add(th_filter, inputs=['user/throttle'], outputs=['user/throttle'])
+    V.add(th_filter, inputs=['user/vel_scalar'], outputs=['user/vel_scalar'])
 
     # add some other basic modules
     V.add(PilotCondition(), inputs=['user/mode'], outputs=['run_pilot'])
@@ -27,7 +29,7 @@ def add_basic_modules(V, cfg):
 
 def add_tub_save_data(V, cfg):
     inputs=['cam/image_array',
-            'user/angle', 'user/throttle',
+            'user/angle', 'user/vel_scalar',
             'user/mode']
 
     types=['image_array',
@@ -52,8 +54,11 @@ def add_tub_save_data(V, cfg):
             'float', 'float', 'float','float', 'float']
 
     if cfg.RECORD_DURING_AI:
-        inputs += ['pilot/angle', 'pilot/throttle']
+        inputs += ['pilot/angle', 'pilot/vel_scalar']
         types += ['float', 'float']
+    
+    inputs += ['angle', 'throttle']
+    types += ['float', 'float']
 
     th = TubHandler(path=cfg.DATA_PATH)
     tub = th.new_tub_writer(inputs=inputs, types=types)
@@ -79,17 +84,62 @@ def add_control_modules(V, cfg):
 class DriveMode:
     def __init__(self, cfg):
         self.cfg = cfg
+        self.params = {
+            'default_throttle': 0.45,  # Default Throttle
+            'pid_p': 0.25,  # PID speed controller parameters
+            'pid_i': 0.20,
+            'pid_d': 0.00,
+            'throttle_max': 0.6,
+            'speed_indicator': 2
+        }
+        # PID speed controller
+        self.pid = PID(p=self.params['pid_p'], i=self.params['pid_i'], d=self.params['pid_d'])
+    
+    def cal_throttle(self, current_speed, target_speed):
+        self.pid.target = target_speed
+        pid_gain = self.pid(feedback=current_speed)
+
+        throttle = min(max(self.params['default_throttle'] - 1.0 * pid_gain, 0),
+                       self.params['throttle_max'])
+        
+        return throttle
+
     def run(self, mode,
-                user_angle, user_throttle,
-                pilot_angle, pilot_throttle):
+                user_angle, user_vel_scalar,
+                pilot_angle, pilot_vel_scalar, vel_x, vel_y):
+        
+        current_speed = np.sqrt(vel_x**2 + vel_y**2)
+        print('vel: %.1f'%current_speed)
+        
         if mode == 'user':
+            if user_vel_scalar > 0:
+                target_speed = user_vel_scalar * self.params['speed_indicator']
+                user_throttle = self.cal_throttle(current_speed, target_speed)
+            else:
+                user_throttle = user_vel_scalar * 1.2
+
             return user_angle, user_throttle
 
         elif mode == 'local_angle':
+            if user_vel_scalar > 0:
+                target_speed = user_vel_scalar * self.params['speed_indicator']
+                user_throttle = self.cal_throttle(current_speed, target_speed)
+            else:
+                user_throttle = user_vel_scalar * 1.2
+
             return pilot_angle if pilot_angle else 0.0, user_throttle
 
         else:
-            return pilot_angle if pilot_angle else 0.0, pilot_throttle * self.cfg.AI_THROTTLE_MULT if pilot_throttle else 0.0
+            if pilot_vel_scalar:
+                if pilot_vel_scalar > 0:
+                    target_speed = pilot_vel_scalar * self.params['speed_indicator']
+                    pilot_throttle = self.cal_throttle(current_speed, target_speed) * self.cfg.AI_THROTTLE_MULT
+                else:
+                    pilot_throttle = pilot_vel_scalar
+            else:
+                pilot_throttle = 0
+
+            return pilot_angle if pilot_angle else 0.0, pilot_throttle
 
 class AiRunCondition:
     '''

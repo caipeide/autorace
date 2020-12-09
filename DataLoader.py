@@ -55,7 +55,7 @@ class SelfDriveDataset(Dataset):
             vel_y = this_data['vel_y']
 
             vel = np.sqrt(vel_x**2 + vel_y**2)
-            imu_vector = torch.tensor([acl_x, acl_y, acl_z, gyr_x, gyr_y, gyr_z, vel]).float()
+            imu_vector = torch.tensor([acl_x, acl_y, acl_z, gyr_x, gyr_y, gyr_z, vel]).float() # 7-dimensional.
 
             sample = {'rgb': rgb, 
                     'imu_vector': imu_vector,

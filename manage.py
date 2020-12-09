@@ -74,14 +74,14 @@ def drive(cfg, model_path=None, use_joystick=False, use_trt = False, use_half = 
         ctr = get_js_controller(cfg)
         V.add(ctr, 
           inputs=['cam/image_array'],
-          outputs=['user/angle', 'user/throttle', 'user/mode', 'recording'],
+          outputs=['user/angle', 'user/vel_scalar', 'user/mode', 'recording'],
           threaded=True)
     else:
         # This web controller will create a web server that is capable of managing steering, throttle, and modes, and more.
         ctr = LocalWebController(port=cfg.WEB_CONTROL_PORT, mode=cfg.WEB_INIT_MODE)
         V.add(ctr,
           inputs=['cam/image_array', 'tub/num_records'],
-          outputs=['user/angle', 'user/throttle', 'user/mode', 'recording'],
+          outputs=['user/angle', 'user/vel_scalar', 'user/mode', 'recording'],
           threaded=True)
     V = add_basic_modules(V, cfg) # e.g., record tracker
     
@@ -125,7 +125,7 @@ def drive(cfg, model_path=None, use_joystick=False, use_trt = False, use_half = 
         else:
             drive_class = DriveIMUClass(cfg, model_type, drive_model, device, cam = cam, half = use_half)
         
-        outputs=['pilot/angle', 'pilot/throttle']
+        outputs=['pilot/angle', 'pilot/vel_scalar']
         V.add(drive_class, inputs=model_inputs,
             outputs=outputs,
             run_condition='run_pilot', threaded=False)
@@ -136,8 +136,8 @@ def drive(cfg, model_path=None, use_joystick=False, use_trt = False, use_half = 
     # 5. Choose which control command to use
     # -------------------------------- 
     V.add(DriveMode(cfg),
-          inputs=['user/mode', 'user/angle', 'user/throttle',
-                  'pilot/angle', 'pilot/throttle'],
+          inputs=['user/mode', 'user/angle', 'user/vel_scalar',
+                  'pilot/angle', 'pilot/vel_scalar', 'uwb/vel_x', 'uwb/vel_y'],
           outputs=['angle', 'throttle'])
 
 
