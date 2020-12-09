@@ -166,7 +166,7 @@ class DriveIMUClass:
             self.run_throttle = run_throttle
             
     
-    def run(self, img_arr, acl_x = 0, acl_y = 0, acl_z = 0, gyr_x = 0, gyr_y = 0, gyr_z = 0, vel_x = 0, vel_y = 0, vel_z = 0 ):
+    def run(self, img_arr, acl_x = 0, acl_y = 0, acl_z = 0, gyr_x = 0, gyr_y = 0, gyr_z = 0, vel_x = 0, vel_y = 0):
         # imu info
         vel = np.sqrt(vel_x**2 + vel_y**2)
         imu_vector = torch.tensor([acl_x, acl_y, acl_z, gyr_x, gyr_y, gyr_z, vel]).float()

@@ -94,7 +94,7 @@ def drive(cfg, model_path=None, use_joystick=False, use_trt = False, use_half = 
         model_inputs.extend([
             'imu/acl_x', 'imu/acl_y', 'imu/acl_z',
             'imu/gyr_x', 'imu/gyr_y', 'imu/gyr_z',
-            'uwb/vel_x', 'uwb/vel_y', 'uwb/vel_z'])
+            'uwb/vel_x', 'uwb/vel_y'])
     if model_path:
         print('loading the self-driving model, model_path:', model_path)
         t0 = time.time()
