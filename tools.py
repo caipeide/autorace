@@ -85,10 +85,10 @@ class DriveMode:
     def __init__(self, cfg):
         self.cfg = cfg
         self.params = {
-            'default_throttle': 0.45,  # Default Throttle
-            'pid_p': 0.15,  # PID speed controller parameters
-            'pid_i': 0.15, # 0.2
-            'pid_d': 0.00,
+            'default_throttle': 0,  # Default Throttle
+            'pid_p': 0.4,  # PID speed controller parameters
+            'pid_i': 0.0,  # 0.2
+            'pid_d': 0.0,
             'throttle_max': 0.7,
             'speed_indicator': 2
         }
@@ -99,7 +99,7 @@ class DriveMode:
         self.pid.target = target_speed
         pid_gain = self.pid(feedback=current_speed)
 
-        throttle = min(max(self.params['default_throttle'] - 1.0 * pid_gain, 0.45),
+        throttle = min(max(self.params['default_throttle'] - 1.0 * pid_gain, 0),
                        self.params['throttle_max'])
 
         return throttle
@@ -109,15 +109,15 @@ class DriveMode:
                 pilot_angle, pilot_vel_scalar, vel_x, vel_y):
         
         current_speed = np.sqrt(vel_x**2 + vel_y**2)
-        # print('vel: %.1f'%current_speed, end=' | ')
+        print('vel: %.1f'%current_speed, end=' | ')
         
         if mode == 'user':
             if user_vel_scalar > 0:
                 target_speed = user_vel_scalar * self.params['speed_indicator']
                 user_throttle = self.cal_throttle(current_speed, target_speed)
             else:
-                user_throttle = user_vel_scalar * 1.2
-            # print(user_throttle)
+                user_throttle = user_vel_scalar 
+            print(user_throttle)
             return user_angle, user_throttle
 
         elif mode == 'local_angle':
@@ -125,7 +125,7 @@ class DriveMode:
                 target_speed = user_vel_scalar * self.params['speed_indicator']
                 user_throttle = self.cal_throttle(current_speed, target_speed)
             else:
-                user_throttle = user_vel_scalar * 1.2
+                user_throttle = user_vel_scalar
 
             return pilot_angle if pilot_angle else 0.0, user_throttle
 

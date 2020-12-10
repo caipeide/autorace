@@ -87,7 +87,7 @@ STEERING_RIGHT_PWM = 290        #pwm value for full right steering
 # JOYSTICK_THROTTLE_DIR = -1.0        # use -1.0 to flip forward/backward, use 1.0 to use joystick's natural forward/backward
 # USE_FPV = False                     # send camera data to FPV webserver
 # JOYSTICK_DEVICE_FILE = "/dev/input/js0" # this is the unix file use to access the joystick.
-GENTLE_THROTTLE = 0.5
+GENTLE_THROTTLE = 0.2
 RAGE_THROTTLE = 1.0
 PER_THROTTLE_STEP = 0.1
 
