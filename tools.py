@@ -85,21 +85,33 @@ class DriveMode:
     def __init__(self, cfg):
         self.cfg = cfg
         self.params = {
-            'default_throttle': 0,  # Default Throttle
-            'pid_p': 0.4,  # PID speed controller parameters
-            'pid_i': 0.0,  # 0.2
+            'default_throttle': 0.2,  # Default Throttle
+            'pid_p': 0.22,  # PID speed controller parameters
+            'pid_i': 0.3,  # 0.2
             'pid_d': 0.0,
-            'throttle_max': 0.7,
+            'throttle_max': 0.75,
             'speed_indicator': 2
         }
         # PID speed controller
         self.pid = PID(p=self.params['pid_p'], i=self.params['pid_i'], d=self.params['pid_d'])
     
     def cal_throttle(self, current_speed, target_speed):
+        if target_speed >= 1.4:
+            default_throttle = 0.25
+            min_throttle = 0.15
+        elif 1.0 < target_speed < 1.4:
+            default_throttle = 0.2
+            min_throttle = 0.05
+        elif 0.6 <= target_speed <= 1.0:
+            default_throttle = 0.1
+            min_throttle = 0.03
+        else:
+            default_throttle = 0.05
+            min_throttle = 0.015
         self.pid.target = target_speed
         pid_gain = self.pid(feedback=current_speed)
 
-        throttle = min(max(self.params['default_throttle'] - 1.0 * pid_gain, 0),
+        throttle = min(max(default_throttle - 1.0 * pid_gain, min_throttle),
                        self.params['throttle_max'])
 
         return throttle
