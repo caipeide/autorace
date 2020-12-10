@@ -20,7 +20,7 @@
 # MODELS_PATH = os.path.join(CAR_PATH, 'models')
 
 # #VEHICLE
-# DRIVE_LOOP_HZ = 20      # the vehicle loop will pause if faster than this speed.
+DRIVE_LOOP_HZ = 10      # the vehicle loop will pause if faster than this speed.
 # MAX_LOOPS = None        # the vehicle loop can abort after this many iterations, when given a positive integer.
 
 # #CAMERA
@@ -87,9 +87,9 @@ STEERING_RIGHT_PWM = 290        #pwm value for full right steering
 # JOYSTICK_THROTTLE_DIR = -1.0        # use -1.0 to flip forward/backward, use 1.0 to use joystick's natural forward/backward
 # USE_FPV = False                     # send camera data to FPV webserver
 # JOYSTICK_DEVICE_FILE = "/dev/input/js0" # this is the unix file use to access the joystick.
-# GENTLE_THROTTLE = 0.45
-# RAGE_THROTTLE = 0.75
-# PER_THROTTLE_STEP = 0.05
+GENTLE_THROTTLE = 0.5
+RAGE_THROTTLE = 1.0
+PER_THROTTLE_STEP = 0.1
 
 # #RNN or 3D
 # SEQUENCE_LENGTH = 3             #some models use a number of images over time. This controls how many.

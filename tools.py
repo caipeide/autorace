@@ -86,10 +86,10 @@ class DriveMode:
         self.cfg = cfg
         self.params = {
             'default_throttle': 0.45,  # Default Throttle
-            'pid_p': 0.25,  # PID speed controller parameters
-            'pid_i': 0.20,
+            'pid_p': 0.15,  # PID speed controller parameters
+            'pid_i': 0.15, # 0.2
             'pid_d': 0.00,
-            'throttle_max': 0.6,
+            'throttle_max': 0.7,
             'speed_indicator': 2
         }
         # PID speed controller
@@ -99,9 +99,9 @@ class DriveMode:
         self.pid.target = target_speed
         pid_gain = self.pid(feedback=current_speed)
 
-        throttle = min(max(self.params['default_throttle'] - 1.0 * pid_gain, 0),
+        throttle = min(max(self.params['default_throttle'] - 1.0 * pid_gain, 0.45),
                        self.params['throttle_max'])
-        
+
         return throttle
 
     def run(self, mode,
@@ -109,7 +109,7 @@ class DriveMode:
                 pilot_angle, pilot_vel_scalar, vel_x, vel_y):
         
         current_speed = np.sqrt(vel_x**2 + vel_y**2)
-        print('vel: %.1f'%current_speed)
+        # print('vel: %.1f'%current_speed, end=' | ')
         
         if mode == 'user':
             if user_vel_scalar > 0:
@@ -117,7 +117,7 @@ class DriveMode:
                 user_throttle = self.cal_throttle(current_speed, target_speed)
             else:
                 user_throttle = user_vel_scalar * 1.2
-
+            # print(user_throttle)
             return user_angle, user_throttle
 
         elif mode == 'local_angle':
