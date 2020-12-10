@@ -103,7 +103,7 @@ class DriveMode:
             default_throttle = 0.2
             min_throttle = 0.05
         elif 0.6 <= target_speed <= 1.0:
-            default_throttle = 0.1
+            default_throttle = 0.12
             min_throttle = 0.03
         else:
             default_throttle = 0.05
