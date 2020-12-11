@@ -86,7 +86,11 @@ class UWBClass:
         self.cfg = cfg
         # open the serial port
         print('opening the serial port: %s with baud rate: %d'%(cfg.SERIAL_PORT, cfg.BAUD_RATE))
-        self.t = serial.Serial(cfg.SERIAL_PORT, cfg.BAUD_RATE, timeout=0.5)
+        try:
+            self.t = serial.Serial(cfg.SERIAL_PORT, cfg.BAUD_RATE, timeout=0.5)
+        except:
+            print('\n##########################################\n!!! ERROR !!!: Cannot open the serial port at: %s, please check if connected, or try another index (ttyUSB0, ttyUSB1, ...)\n##########################################\n'%cfg.SERIAL_PORT)
+            exit()
         # define variables
         self.vel_x = 0
         self.vel_y = 0

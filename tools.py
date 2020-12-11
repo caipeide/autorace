@@ -6,6 +6,7 @@ import time
 from donkeycar.parts.throttle_filter import ThrottleFilter
 from donkeycar.parts.datastore import TubHandler
 from donkeycar.parts.actuator import PCA9685, PWMSteering, PWMThrottle
+import threading
 
 def add_basic_modules(V, cfg):
 
@@ -146,3 +147,10 @@ class ImgPreProcess():
 
     def run(self, img_arr):
         return normalize_and_crop(img_arr, self.cfg)
+
+class UWBChecker(threading.Thread):
+    def __init__(self):
+        threading.Thread.__init__(self)
+        self.key_input = None
+    def run(self):
+        self.key_input = input("\n\n##########################################\nPlease move your car to check the speed feedback, and press ENTER to continue;\nIf the speed information is always ZERO when moving the car, do the followings:\n  1. press Ctrl+C to kill this program;\n  2. check if UWB base stations (4x) are powered on;\n  3. re-insert the UWB tag on the car;\n  4. re-start the program.\n##########################################\n") 
