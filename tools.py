@@ -84,6 +84,10 @@ class DriveMode:
                 user_angle, user_throttle,
                 pilot_angle, pilot_throttle):
         if mode == 'user':
+            # for quick reverse
+            if user_throttle < 0 and user_throttle >= -0.3:
+                user_throttle = user_throttle * 1.5
+
             return user_angle, user_throttle
 
         elif mode == 'local_angle':
