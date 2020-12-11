@@ -14,7 +14,7 @@ class DriveClass:
 
         self.drive_model = drive_model
         self.run_steering = 0.0
-        self.run_throttle = 0.0
+        self.run_vel_scalar = 0.0
         self.cam = cam
         self.device = device
         self.half = half
@@ -49,7 +49,7 @@ class DriveClass:
                 else:
                     img_arr = transforms.ToTensor()(img_arr)
                 img_arr = torch.unsqueeze(img_arr, 0).to(self.device)
-                run_steering, run_throttle = self.drive_model(img_arr)
+                run_steering, run_vel_scalar = self.drive_model(img_arr)
             elif self.model_type == 'rnn':
                 while len(self.img_seq) < self.seq_length:
                     self.img_seq.append(Image.fromarray(img_arr))
@@ -61,14 +61,14 @@ class DriveClass:
                 if self.half:
                     rgbs = rgbs.half()
                 rgbs = torch.unsqueeze(rgbs, 0).to(self.device)
-                run_steering, run_throttle = self.drive_model(rgbs)
+                run_steering, run_vel_scalar = self.drive_model(rgbs)
             
             
             run_steering = float(run_steering.detach().cpu().numpy())
-            run_throttle = float(run_throttle.detach().cpu().numpy())
+            run_vel_scalar = float(run_vel_scalar.detach().cpu().numpy())
 
             self.run_steering = run_steering
-            self.run_throttle = run_throttle
+            self.run_vel_scalar = run_vel_scalar
             
     def run(self, img_arr):
         if self.model_type == 'linear' or self.model_type == 'resnet18':
@@ -79,7 +79,7 @@ class DriveClass:
             else:
                 img_arr = transforms.ToTensor()(img_arr)
             img_arr = torch.unsqueeze(img_arr, 0).to(self.device)
-            run_steering, run_throttle = self.drive_model(img_arr)
+            run_steering, run_vel_scalar = self.drive_model(img_arr)
         elif self.model_type == 'rnn':
             while len(self.img_seq) < self.seq_length:
                 self.img_seq.append(Image.fromarray(img_arr))
@@ -91,15 +91,15 @@ class DriveClass:
             if self.half:
                 rgbs = rgbs.half()
             rgbs = torch.unsqueeze(rgbs, 0).to(self.device)
-            run_steering, run_throttle = self.drive_model(rgbs)
+            run_steering, run_vel_scalar = self.drive_model(rgbs)
            
         
         run_steering = float(run_steering.detach().cpu().numpy())
-        run_throttle = float(run_throttle.detach().cpu().numpy())
-        return run_steering, run_throttle
+        run_vel_scalar = float(run_vel_scalar.detach().cpu().numpy())
+        return run_steering, run_vel_scalar
     
     def run_threaded(self, img_arr):
-        return self.run_steering, self.run_throttle
+        return self.run_steering, self.run_vel_scalar
 
 
 
@@ -109,7 +109,7 @@ class DriveIMUClass:
 
         self.drive_model = drive_model
         self.run_steering = 0.0
-        self.run_throttle = 0.0
+        self.run_vel_scalar = 0.0
         self.cam = cam
         self.device = device
         self.half = half
@@ -144,7 +144,7 @@ class DriveIMUClass:
                 else:
                     img_arr = transforms.ToTensor()(img_arr)
                 img_arr = torch.unsqueeze(img_arr, 0).to(self.device)
-                run_steering, run_throttle = self.drive_model(img_arr)
+                run_steering, run_vel_scalar = self.drive_model(img_arr)
             elif self.model_type == 'rnn':
                 while len(self.img_seq) < self.seq_length:
                     self.img_seq.append(Image.fromarray(img_arr))
@@ -156,14 +156,14 @@ class DriveIMUClass:
                 if self.half:
                     rgbs = rgbs.half()
                 rgbs = torch.unsqueeze(rgbs, 0).to(self.device)
-                run_steering, run_throttle = self.drive_model(rgbs)
+                run_steering, run_vel_scalar = self.drive_model(rgbs)
             
             
             run_steering = float(run_steering.detach().cpu().numpy())
-            run_throttle = float(run_throttle.detach().cpu().numpy())
+            run_vel_scalar = float(run_vel_scalar.detach().cpu().numpy())
 
             self.run_steering = run_steering
-            self.run_throttle = run_throttle
+            self.run_vel_scalar = run_vel_scalar
             
     
     def run(self, img_arr, acl_x = 0, acl_y = 0, acl_z = 0, gyr_x = 0, gyr_y = 0, gyr_z = 0, vel_x = 0, vel_y = 0):
@@ -182,14 +182,14 @@ class DriveIMUClass:
         img_arr = torch.unsqueeze(img_arr, 0).to(self.device)
         imu_vector = torch.unsqueeze(imu_vector, 0).to(self.device)
 
-        run_steering, run_throttle = self.drive_model(img_arr, imu_vector)           
+        run_steering, run_vel_scalar = self.drive_model(img_arr, imu_vector)           
         
         run_steering = float(run_steering.detach().cpu().numpy())
-        run_throttle = float(run_throttle.detach().cpu().numpy())
-        return run_steering, run_throttle
+        run_vel_scalar = float(run_vel_scalar.detach().cpu().numpy())
+        return run_steering, run_vel_scalar
     
     def run_threaded(self, img_arr):
-        return self.run_steering, self.run_throttle
+        return self.run_steering, self.run_vel_scalar
 
 
 class LinearModel(nn.Module):
@@ -221,7 +221,7 @@ class LinearModel(nn.Module):
                             nn.Linear(128, 1)
         )
 
-        self.layer_throttle = nn.Sequential(
+        self.layer_vel_scalar = nn.Sequential(
                             nn.Linear(512, 256), nn.BatchNorm1d(256), nn.ReLU(True),
                             nn.Linear(256, 128), nn.BatchNorm1d(128), nn.ReLU(True),
                             nn.Linear(128, 1)
@@ -233,9 +233,9 @@ class LinearModel(nn.Module):
         x = torch.flatten(x, start_dim=1) # flatten to size of: batch_size*512
 
         steering = self.layer_steering(x)
-        throttle = self.layer_throttle(x)
+        vel_scalar = self.layer_vel_scalar(x)
 
-        return steering[:,0], throttle[:,0]
+        return steering[:,0], vel_scalar[:,0]
 
 
 class LinearResModel(nn.Module):
@@ -250,7 +250,7 @@ class LinearResModel(nn.Module):
                             nn.Linear(128, 1)
         )
 
-        self.layer_throttle = nn.Sequential(
+        self.layer_vel_scalar = nn.Sequential(
                             nn.Linear(512, 256), nn.BatchNorm1d(256), nn.ReLU(True),
                             nn.Linear(256, 128), nn.BatchNorm1d(128), nn.ReLU(True),
                             nn.Linear(128, 1)
@@ -260,9 +260,9 @@ class LinearResModel(nn.Module):
         x = self.resnet_rgb(rgb)
 
         steering = self.layer_steering(x)
-        throttle = self.layer_throttle(x)
+        vel_scalar = self.layer_vel_scalar(x)
 
-        return steering[:,0], throttle[:,0]
+        return steering[:,0], vel_scalar[:,0]
 
 
 class LinearResIMUModel(nn.Module):
@@ -278,7 +278,7 @@ class LinearResIMUModel(nn.Module):
                             nn.Linear(128, 1)
         )
 
-        self.layer_throttle = nn.Sequential(
+        self.layer_vel_scalar = nn.Sequential(
                             nn.Linear(512+128, 256), nn.BatchNorm1d(256), nn.ReLU(True),
                             nn.Linear(256, 128), nn.BatchNorm1d(128), nn.ReLU(True),
                             nn.Linear(128, 1)
@@ -297,9 +297,9 @@ class LinearResIMUModel(nn.Module):
         x = torch.cat((x, x_imu), dim=1) # batch, 512 + 128
 
         steering = self.layer_steering(x)
-        throttle = self.layer_throttle(x)
+        vel_scalar = self.layer_vel_scalar(x)
 
-        return steering[:,0], throttle[:,0]
+        return steering[:,0], vel_scalar[:,0]
 
 
 class RNNModel(nn.Module):
@@ -317,7 +317,7 @@ class RNNModel(nn.Module):
                             nn.Linear(128, 1)
         )
 
-        self.layer_throttle = nn.Sequential(
+        self.layer_vel_scalar = nn.Sequential(
                             nn.Linear(256, 256), nn.BatchNorm1d(256), nn.ReLU(True),
                             nn.Linear(256, 128), nn.BatchNorm1d(128), nn.ReLU(True),
                             nn.Linear(128, 1)
@@ -336,7 +336,7 @@ class RNNModel(nn.Module):
         seq_feature = seq_features[:,-1,:]
 
         steering = self.layer_steering(seq_feature)
-        throttle = self.layer_throttle(seq_feature)
+        vel_scalar = self.layer_vel_scalar(seq_feature)
 
-        return steering[:,0], throttle[:,0]
+        return steering[:,0], vel_scalar[:,0]
 

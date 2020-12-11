@@ -28,7 +28,7 @@ class SelfDriveDataset(Dataset):
         this_data = self.dataset_list_dict[idx]
         
         future_steer = np.array(this_data['angle'])
-        future_throttle = np.array(this_data['throttle'])
+        future_vel_scalar = np.array(this_data['vel_scalar'])
 
         rgb_path = this_data['image_path']
         rgb = Image.open(rgb_path)
@@ -39,7 +39,7 @@ class SelfDriveDataset(Dataset):
 
         sample = {'rgb': rgb, 
                 'steering': torch.from_numpy(future_steer).float(),
-                'throttle': torch.from_numpy(future_throttle).float()}
+                'vel_scalar': torch.from_numpy(future_vel_scalar).float()}
                     
         if 'imu' in self.model_type:
             # prepare the imu data
@@ -60,7 +60,7 @@ class SelfDriveDataset(Dataset):
             sample = {'rgb': rgb, 
                     'imu_vector': imu_vector,
                     'steering': torch.from_numpy(future_steer).float(),
-                    'throttle': torch.from_numpy(future_throttle).float()}     
+                    'vel_scalar': torch.from_numpy(future_vel_scalar).float()}     
         return sample
 
     

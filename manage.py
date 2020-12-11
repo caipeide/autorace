@@ -137,7 +137,9 @@ def drive(cfg, model_path=None, use_joystick=False, use_trt = False, use_half = 
     # -------------------------------- 
     V.add(DriveMode(cfg),
           inputs=['user/mode', 'user/angle', 'user/vel_scalar',
-                  'pilot/angle', 'pilot/vel_scalar', 'uwb/vel_x', 'uwb/vel_y'],
+                  'pilot/angle', 'pilot/vel_scalar', 'uwb/vel_x', 'uwb/vel_y'], 
+                  # use 'vel_scalar' for target speed, and current speed is feedback from uwb position system: 'uwb/vel_x', 'uwb/vel_y'
+                  # then the throttle can be calculated by a pid controller.
           outputs=['angle', 'throttle'])
 
 

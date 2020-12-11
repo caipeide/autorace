@@ -32,7 +32,7 @@ DRIVE_LOOP_HZ = 10      # the vehicle loop will pause if faster than this speed.
 
 #UWB
 # HAVE_UWB = True
-SERIAL_PORT = '/dev/ttyUSB1'
+SERIAL_PORT = '/dev/ttyUSB0'
 # BAUD_RATE = 921600
 
 # # Region of interst cropping

@@ -76,10 +76,10 @@ def collate_records(model_type, records, gen_records):
         # sample["json_data"] = json_data        
 
         angle = float(json_data['user/angle'])
-        throttle = float(json_data["user/throttle"])
+        vel_scalar = float(json_data["user/vel_scalar"])
 
         sample['angle'] = angle
-        sample['throttle'] = throttle
+        sample['vel_scalar'] = vel_scalar
 
         if 'imu' in model_type:
             acl_x = float(json_data['imu/acl_x'])
@@ -320,21 +320,21 @@ def go_train(model_type, trainloader, validloader, device, optimizer, drive_mode
 
             rgb = sample_batch['rgb'].to(device)
             steering = sample_batch['steering'].to(device)
-            throttle = sample_batch['throttle'].to(device)
+            vel_scalar = sample_batch['vel_scalar'].to(device)
             if 'imu' in model_type:
                 imu_vector = sample_batch['imu_vector'].to(device)
-                net_steering, net_throttle = drive_model(rgb, imu_vector)
+                net_steering, net_vel_scalar = drive_model(rgb, imu_vector)
             else:
-                net_steering, net_throttle = drive_model(rgb)
+                net_steering, net_vel_scalar = drive_model(rgb)
 
             loss_steer = F.mse_loss(net_steering, steering)
-            loss_throttle = F.mse_loss(net_throttle, throttle)
-            loss = loss_steer + loss_throttle
+            loss_vel_scalar = F.mse_loss(net_vel_scalar, vel_scalar)
+            loss = loss_steer + loss_vel_scalar
             loss.backward()
             optimizer.step()
 
             writer.add_scalar('Train/Loss_steer', loss_steer.item(), len(trainloader)*(epoch-1) + i+1 )
-            writer.add_scalar('Train/Loss_throttle', loss_throttle.item(), len(trainloader)*(epoch-1) + i+1 )
+            writer.add_scalar('Train/Loss_vel_scalar', loss_vel_scalar.item(), len(trainloader)*(epoch-1) + i+1 )
             writer.add_scalar('Train/Loss', loss.item(), len(trainloader)*(epoch-1) + i+1 )
 
             print('Epoch: {}, [Batch: {}/ TotalBatch: {}] Train_BatchLoss: {:.3f}'.format(epoch, i+1 , len(trainloader), loss.item()),end='\r')
@@ -344,31 +344,31 @@ def go_train(model_type, trainloader, validloader, device, optimizer, drive_mode
         print()
         drive_model.eval()
         valid_losses_steer = []
-        valid_losses_throttle = []
+        valid_losses_vel_scalar = []
 
         with torch.no_grad():
             for i, sample_batch in enumerate(validloader):
                 rgb = sample_batch['rgb'].to(device)
                 steering = sample_batch['steering'].to(device)
-                throttle = sample_batch['throttle'].to(device)
+                vel_scalar = sample_batch['vel_scalar'].to(device)
                 if 'imu' in model_type:
                     imu_vector = sample_batch['imu_vector'].to(device)
-                    net_steering, net_throttle = drive_model(rgb, imu_vector)
+                    net_steering, net_vel_scalar = drive_model(rgb, imu_vector)
                 else:
-                    net_steering, net_throttle = drive_model(rgb)
+                    net_steering, net_vel_scalar = drive_model(rgb)
 
                 loss_steer = F.mse_loss(net_steering, steering)
-                loss_throttle = F.mse_loss(net_throttle, throttle)
-                loss = loss_steer + loss_throttle
+                loss_vel_scalar = F.mse_loss(net_vel_scalar, vel_scalar)
+                loss = loss_steer + loss_vel_scalar
 
                 valid_losses.append(loss.item())
                 valid_losses_steer.append(loss_steer.item())
-                valid_losses_throttle.append(loss_throttle.item())
+                valid_losses_vel_scalar.append(loss_vel_scalar.item())
 
                 print('Epoch: {} [Batch: {}/ TotalBatch: {}] Valid_BatchLoss: {:.3f}'.format(epoch, i+1 , len(validloader), loss.item()),end='\r')
 
         writer.add_scalar('Valid/Loss_steer', np.average(valid_losses_steer), epoch)
-        writer.add_scalar('Valid/Loss_throttle', np.average(valid_losses_throttle), epoch)
+        writer.add_scalar('Valid/Loss_vel_scalar', np.average(valid_losses_vel_scalar), epoch)
         writer.add_scalar('Valid/Loss', np.average(valid_losses), epoch)
 
         # print training/validation statistics 
