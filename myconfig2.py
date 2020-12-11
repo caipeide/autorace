@@ -80,22 +80,22 @@ STEERING_RIGHT_PWM = 290        #pwm value for full right steering
 
 # #JOYSTICK
 # USE_JOYSTICK_AS_DEFAULT = False     #when starting the manage.py, when True, will not require a --js option to use the joystick
-JOYSTICK_MAX_THROTTLE = 0.25         # [0,1], this scalar is multiplied with the throttle value (-1 to 1) to limit the maximum throttle. This can help if you drop the controller or just don't need the full speed available.
+JOYSTICK_MAX_THROTTLE = 0.3         # [0,1], this scalar is multiplied with the throttle value (-1 to 1) to limit the maximum throttle. This can help if you drop the controller or just don't need the full speed available.
 # JOYSTICK_STEERING_SCALE = 1.0       #some people want a steering that is less sensitve. This scalar is multiplied with the steering -1 to 1. It can be negative to reverse dir.
 # AUTO_RECORD_ON_THROTTLE = True      #if true, we will record whenever throttle is not zero. if false, you must manually toggle recording with some other trigger. Usually circle button on joystick.
 # JOYSTICK_DEADZONE = 0.0             # when non zero, this is the smallest throttle before recording triggered.
 # JOYSTICK_THROTTLE_DIR = -1.0        # use -1.0 to flip forward/backward, use 1.0 to use joystick's natural forward/backward
 # USE_FPV = False                     # send camera data to FPV webserver
 # JOYSTICK_DEVICE_FILE = "/dev/input/js0" # this is the unix file use to access the joystick.
-GENTLE_THROTTLE = 0.175
-RAGE_THROTTLE = 0.35
-PER_THROTTLE_STEP = 0.05
+GENTLE_THROTTLE = 0.2
+RAGE_THROTTLE = 0.4
+PER_THROTTLE_STEP = 0.1
 
 # #RNN or 3D
 # SEQUENCE_LENGTH = 3             #some models use a number of images over time. This controls how many.
 
 # #RECORD OPTIONS
-# RECORD_DURING_AI = False        #normally we do not record during ai mode. Set this to true to get image and steering records for your Ai. Be careful not to use them to train.
+RECORD_DURING_AI = True        #normally we do not record during ai mode. Set this to true to get image and steering records for your Ai. Be careful not to use them to train.
 
 # #Scale the output of the throttle of the ai pilot for all model types.
 # AI_THROTTLE_MULT = 1.0              # this multiplier will scale every throttle value for all output from NN models

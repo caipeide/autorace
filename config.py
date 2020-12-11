@@ -65,7 +65,7 @@ THROTTLE_PWM_INVERTED = False   #If PWM needs to be inverted
 #line parameter --type to the python manage.py train and drive commands.
 DEFAULT_MODEL_TYPE = 'linear'   #(linear|categorical|rnn|imu|behavior|3d|localizer|latent)
 BATCH_SIZE = 128                #how many records to use when doing one pass of gradient decent. Use a smaller number if your gpu is running out of memory.
-TRAIN_TEST_SPLIT = 0.8          #what percent of records to use for training. the remaining used for validation.
+TRAIN_TEST_SPLIT = 0.85          #what percent of records to use for training. the remaining used for validation.
 MAX_EPOCHS = 100                #how many times to visit all records of your data
 EARLY_STOP_PATIENCE = 5         #how many epochs to wait before no improvement
 MIN_DELTA = .0005               #early stop will want this much loss change before calling it improved.
