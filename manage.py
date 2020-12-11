@@ -25,7 +25,7 @@ from tools import *
 from donkeycar.parts.camera import CSICamera
 from ai_drive_models import LinearModel, DriveClass, DriveIMUClass, RNNModel, LinearResModel, LinearResIMUModel
 from uwb_tools import UWBClass
-            
+
 def drive(cfg, model_path=None, use_joystick=False, use_trt = False, use_half = False, model_type=None):
 
     # -------------------------------- 
@@ -63,6 +63,23 @@ def drive(cfg, model_path=None, use_joystick=False, use_trt = False, use_half = 
             'uwb/pose_unc_x', 'uwb/pose_unc_y', 'uwb/pose_unc_z', #m
             'uwb/ori_x', 'uwb/ori_y', 'uwb/ori_z', 'uwb/tag_id', 'uwb/voltage'], threaded=True) #degree, None, V
 
+        checker = UWBChecker()
+        checker.start()
+        count = 0
+        while True:
+            try:
+                count += 1
+                print('vel_x: %.2f, vel_y: %.2f' % (uwb.vel_x, uwb.vel_y))
+                time.sleep(0.25)
+                if count%25 == 0:
+                    print("##########################################\nPlease move your car to check the speed feedback, and press ENTER to continue;\nIf the speed information is always ZERO when moving the car, do the followings:\n  1. press Ctrl+C to kill this program;\n  2. check if UWB base stations (4x) are powered on;\n  3. re-insert the UWB tag on the car;\n  4. re-start the program.\n##########################################")
+                if checker.key_input == '':
+                    del checker
+                    break
+            except:
+                import signal
+                os.kill(os.getpid(), signal.SIGKILL)
+            
 
     # -------------------------------- 
     # 3. Add gamepad or webpage controller
@@ -170,7 +187,7 @@ def drive(cfg, model_path=None, use_joystick=False, use_trt = False, use_half = 
     # 9. press "Enter" to start if using AI mode, or else directly start the vehicle
     # --------------------------------
     if model_path:
-        enter = input("press ENTER to start racing")
+        enter = input("\nREADY: Press ENTER to start racing")
         if enter == '':
             V.start(rate_hz=cfg.DRIVE_LOOP_HZ, max_loop_count=cfg.MAX_LOOPS) #run the vehicle for DRIVE_LOOP_HZ, e.g., 20 HZ
     else:

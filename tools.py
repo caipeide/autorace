@@ -8,6 +8,7 @@ from donkeycar.parts.datastore import TubHandler
 from donkeycar.parts.actuator import PCA9685, PWMSteering, PWMThrottle
 from pid_controller.pid import PID
 import numpy as np
+import threading
 
 def add_basic_modules(V, cfg):
 
@@ -121,7 +122,7 @@ class DriveMode:
                 pilot_angle, pilot_vel_scalar, vel_x, vel_y):
         
         current_speed = np.sqrt(vel_x**2 + vel_y**2)
-        print('vel: %.1f'%current_speed, end=' | ')
+        # print('vel: %.1f'%current_speed, end=' | ')
         
         if mode == 'user':
             if user_vel_scalar > 0:
@@ -129,7 +130,7 @@ class DriveMode:
                 user_throttle = self.cal_throttle(current_speed, target_speed)
             else:
                 user_throttle = user_vel_scalar 
-            print(user_throttle)
+            # print(user_throttle)
             return user_angle, user_throttle
 
         elif mode == 'local_angle':
@@ -208,3 +209,10 @@ class ImgPreProcess():
 
     def run(self, img_arr):
         return normalize_and_crop(img_arr, self.cfg)
+
+class UWBChecker(threading.Thread):
+    def __init__(self):
+        threading.Thread.__init__(self)
+        self.key_input = None
+    def run(self):
+        self.key_input = input("\n\n##########################################\nPlease move your car to check the speed feedback, and press ENTER to continue;\nIf the speed information is always ZERO when moving the car, do the followings:\n  1. press Ctrl+C to kill this program;\n  2. check if UWB base stations (4x) are powered on;\n  3. re-insert the UWB tag on the car;\n  4. re-start the program.\n##########################################\n")
