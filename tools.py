@@ -145,7 +145,14 @@ class DriveMode:
         else:
             if pilot_vel_scalar:
                 if pilot_vel_scalar > 0:
+                    # add a filter for pilot_vel_scalar, 0.5, 0.6, 0.85
+                    if pilot_vel_scalar > 0.8:
+                        pilot_vel_scalar = 0.85
+                    elif 0.55 < pilot_vel_scalar <= 0.8:
+                        pilot_vel_scalar = 0.6
+
                     target_speed = pilot_vel_scalar * self.params['speed_indicator']
+
                     pilot_throttle = self.cal_throttle(current_speed, target_speed) * self.cfg.AI_THROTTLE_MULT
                 else:
                     pilot_throttle = pilot_vel_scalar
