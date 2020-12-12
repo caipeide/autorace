@@ -87,8 +87,8 @@ JOYSTICK_MAX_THROTTLE = 0.5         # [0,1], this scalar is multiplied with the 
 # JOYSTICK_THROTTLE_DIR = -1.0        # use -1.0 to flip forward/backward, use 1.0 to use joystick's natural forward/backward
 # USE_FPV = False                     # send camera data to FPV webserver
 # JOYSTICK_DEVICE_FILE = "/dev/input/js0" # this is the unix file use to access the joystick.
-GENTLE_THROTTLE = 0.45
-RAGE_THROTTLE = 0.65
+GENTLE_THROTTLE = 0.5
+RAGE_THROTTLE = 0.7
 PER_THROTTLE_STEP = 0.1
 
 # #RNN or 3D
