@@ -100,8 +100,8 @@ class DriveMode:
             pilot_throttle = pilot_throttle * self.cfg.AI_THROTTLE_MULT if pilot_throttle else 0.0
             pilot_angle = pilot_angle if pilot_angle else 0.0
             # THROTTLE BOUND
-            if pilot_throttle > 0.35:
-                pilot_throttle = 0.35
+            if pilot_throttle > 0.8:
+                pilot_throttle = 0.8
             if pilot_throttle < 0.08:
                 pilot_throttle = 0.08
             # STEER BOUND
