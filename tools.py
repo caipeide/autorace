@@ -7,6 +7,7 @@ from donkeycar.parts.throttle_filter import ThrottleFilter
 from donkeycar.parts.datastore import TubHandler
 from donkeycar.parts.actuator import PCA9685, PWMSteering, PWMThrottle
 import threading
+import random
 
 def add_basic_modules(V, cfg):
 
@@ -56,6 +57,10 @@ def add_tub_save_data(V, cfg):
         inputs += ['pilot/angle', 'pilot/throttle']
         types += ['float', 'float']
 
+    if cfg.CONTROL_NOISE:
+        inputs += ['user/angle_noise', 'user/throttle_noise']
+        types += ['float', 'float']
+
     inputs += ['angle', 'throttle']
     types += ['float', 'float']
 
@@ -90,8 +95,35 @@ class DriveMode:
             # for quick reverse
             if user_throttle < 0 and user_throttle >= -0.3:
                 user_throttle = user_throttle * 1.5
+            
+            if self.cfg.CONTROL_NOISE:
+                # only apply it if user_throttle > 0
+                throttle_noise = 0
+                angle_noise = 0
+                if user_throttle > 0:
+                    throttle_noise = round(random.uniform(-0.05,0.05),3) # 3 precision
+                    angle_noise = round(random.uniform(-0.25, 0.25),3)
+                    
+                    user_angle += angle_noise
+                    user_throttle += throttle_noise
 
-            return user_angle, user_throttle
+                    # THROTTLE BOUND
+                    if user_throttle > 0.7:
+                        user_throttle = 0.7
+                    if user_throttle < 0:
+                        user_throttle = 0
+                    # STEER BOUND
+                    if user_angle > 1.0:
+                        user_angle = 1.0
+                    if user_angle < -1.0:
+                        user_angle = -1.0
+
+                return user_angle, user_throttle, angle_noise, throttle_noise
+            else:
+                return user_angle, user_throttle
+
+
+            
 
         elif mode == 'local_angle':
             return pilot_angle if pilot_angle else 0.0, user_throttle

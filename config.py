@@ -99,3 +99,6 @@ RECORD_DURING_AI = False        #normally we do not record during ai mode. Set t
 
 #Scale the output of the throttle of the ai pilot for all model types.
 AI_THROTTLE_MULT = 1.0              # this multiplier will scale every throttle value for all output from NN models
+
+# Whether or not add extra control noise during user mode
+CONTROL_NOISE = False

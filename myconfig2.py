@@ -89,7 +89,7 @@ JOYSTICK_MAX_THROTTLE = 0.5         # [0,1], this scalar is multiplied with the 
 # JOYSTICK_DEVICE_FILE = "/dev/input/js0" # this is the unix file use to access the joystick.
 GENTLE_THROTTLE = 0.5
 RAGE_THROTTLE = 0.7
-PER_THROTTLE_STEP = 0.1
+PER_THROTTLE_STEP = 0.05
 
 # #RNN or 3D
 # SEQUENCE_LENGTH = 3             #some models use a number of images over time. This controls how many.
@@ -99,3 +99,6 @@ RECORD_DURING_AI = True        #normally we do not record during ai mode. Set th
 
 # #Scale the output of the throttle of the ai pilot for all model types.
 # AI_THROTTLE_MULT = 1.0              # this multiplier will scale every throttle value for all output from NN models
+
+# Whether or not add extra control noise during user mode
+CONTROL_NOISE = True
