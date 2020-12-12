@@ -56,6 +56,9 @@ def add_tub_save_data(V, cfg):
         inputs += ['pilot/angle', 'pilot/throttle']
         types += ['float', 'float']
 
+    inputs += ['angle', 'throttle']
+    types += ['float', 'float']
+
     th = TubHandler(path=cfg.DATA_PATH)
     tub = th.new_tub_writer(inputs=inputs, types=types)
     V.add(tub, inputs=inputs, outputs=["tub/num_records"], run_condition='recording')
@@ -94,7 +97,19 @@ class DriveMode:
             return pilot_angle if pilot_angle else 0.0, user_throttle
 
         else:
-            return pilot_angle if pilot_angle else 0.0, pilot_throttle * self.cfg.AI_THROTTLE_MULT if pilot_throttle else 0.0
+            pilot_throttle = pilot_throttle * self.cfg.AI_THROTTLE_MULT if pilot_throttle else 0.0
+            pilot_angle = pilot_angle if pilot_angle else 0.0
+            # THROTTLE BOUND
+            if pilot_throttle > 0.35:
+                pilot_throttle = 0.35
+            if pilot_throttle < 0.08:
+                pilot_throttle = 0.08
+            # STEER BOUND
+            if pilot_angle > 1.0:
+                pilot_angle = 1.0
+            if pilot_angle < -1.0:
+                pilot_angle = -1.0
+            return pilot_angle, pilot_throttle
 
 class AiRunCondition:
     '''
