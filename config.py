@@ -94,3 +94,12 @@ RECORD_DURING_AI = False        #normally we do not record during ai mode. Set t
 
 #Scale the output of the throttle of the ai pilot for all model types.
 AI_THROTTLE_MULT = 1.0              # this multiplier will scale every throttle value for all output from NN models
+AI_MAX_THROTTLE = 0.75         # the throttle upper bound during AI mode, in case the model outputs a too large values leading the car to drive too fast and become unstable.
+AI_MIN_THROTTLE = 0.1          # the throttle lower bound during AI mode, in case the model outputs a too small values leading the car to stop
+
+# Whether or not add extra control noise during user mode
+# IF set to TRUE, random action noise (on steering angle and throttle) will be added during your tele-operation. 
+# This can help you to collect more data that the car recovers from off-center and off-orientation mistakes, and then your trained agent will be more "intelligent"
+CONTROL_NOISE = False
+THROTTLE_NOISE = 0.05          # should be > 0, then the range of throttle noise will be in [-THROTTLE_NOISE, THROTTLE_NOISE] (uniform random sampler), larger value leads to more difficult data collection
+ANGLE_NOISE = 0.25             # should be > 0, then the range of steering noise will be in [-ANGLE_NOISE, ANGLE_NOISE] (uniform random sampler), larger value leads to more difficult data collection

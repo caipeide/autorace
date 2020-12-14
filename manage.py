@@ -101,10 +101,14 @@ def drive(cfg, model_path=None, use_joystick=False, use_trt = False, use_half = 
     # -------------------------------- 
     # 5. Choose which control command to use
     # -------------------------------- 
+    out = ['angle', 'throttle']
+    if cfg.CONTROL_NOISE:
+        print('\n##########################################\nAdding Random Action Noise\n##########################################\n')
+        out += ['user/angle_noise', 'user/throttle_noise']
     V.add(DriveMode(cfg),
           inputs=['user/mode', 'user/angle', 'user/throttle',
                   'pilot/angle', 'pilot/throttle'],
-          outputs=['angle', 'throttle'])
+          outputs=out)
 
 
     # -------------------------------- 

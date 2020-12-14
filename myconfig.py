@@ -31,8 +31,8 @@
 # CAMERA_FRAMERATE = DRIVE_LOOP_HZ
 
 # # Region of interst cropping
-# ROI_CROP_TOP = 0                    #the number of rows of pixels to ignore on the top of the image
-# ROI_CROP_BOTTOM = 0                 #the number of rows of pixels to ignore on the bottom of the image
+ROI_CROP_TOP = 35                    #the number of rows of pixels to ignore on the top of the image
+ROI_CROP_BOTTOM = 10                 #the number of rows of pixels to ignore on the bottom of the image
 
 # #9865, over rides only if needed, ie. TX2..
 # PCA9685_I2C_ADDR = 0x40     #I2C address, use i2cdetect to validate this number
@@ -40,8 +40,8 @@
 
 # #STEERING
 # STEERING_CHANNEL = 0            #channel on the 9685 pwm board 0-15
-STEERING_LEFT_PWM = 455         #pwm value for full left steering
-STEERING_RIGHT_PWM = 265        #pwm value for full right steering
+STEERING_LEFT_PWM = 460         #pwm value for full left steering
+STEERING_RIGHT_PWM = 290        #pwm value for full right steering
 
 # #STEERING FOR PIGPIO_PWM
 # STEERING_PWM_PIN = 13           #Pin numbering according to Broadcom numbers
@@ -75,15 +75,15 @@ STEERING_RIGHT_PWM = 265        #pwm value for full right steering
 
 # #JOYSTICK
 # USE_JOYSTICK_AS_DEFAULT = False     #when starting the manage.py, when True, will not require a --js option to use the joystick
-# JOYSTICK_MAX_THROTTLE = 0.5         # [0,1], this scalar is multiplied with the throttle value (-1 to 1) to limit the maximum throttle. This can help if you drop the controller or just don't need the full speed available.
+JOYSTICK_MAX_THROTTLE = 0.5         # [0,1], this scalar is multiplied with the throttle value (-1 to 1) to limit the maximum throttle. This can help if you drop the controller or just don't need the full speed available.
 # JOYSTICK_STEERING_SCALE = 1.0       #some people want a steering that is less sensitve. This scalar is multiplied with the steering -1 to 1. It can be negative to reverse dir.
 # AUTO_RECORD_ON_THROTTLE = True      #if true, we will record whenever throttle is not zero. if false, you must manually toggle recording with some other trigger. Usually circle button on joystick.
 # JOYSTICK_DEADZONE = 0.0             # when non zero, this is the smallest throttle before recording triggered.
 # JOYSTICK_THROTTLE_DIR = -1.0        # use -1.0 to flip forward/backward, use 1.0 to use joystick's natural forward/backward
 # USE_FPV = False                     # send camera data to FPV webserver
 # JOYSTICK_DEVICE_FILE = "/dev/input/js0" # this is the unix file use to access the joystick.
-# GENTLE_THROTTLE = 0.45
-# RAGE_THROTTLE = 0.75
+GENTLE_THROTTLE = 0.5
+RAGE_THROTTLE = 0.7
 # PER_THROTTLE_STEP = 0.05
 
 # #RNN or 3D
@@ -94,3 +94,12 @@ STEERING_RIGHT_PWM = 265        #pwm value for full right steering
 
 # #Scale the output of the throttle of the ai pilot for all model types.
 # AI_THROTTLE_MULT = 1.0              # this multiplier will scale every throttle value for all output from NN models
+# AI_MAX_THROTTLE = 0.75         # the throttle upper bound during AI mode, in case the model outputs a too large values leading the car to drive too fast and become unstable.
+# AI_MIN_THROTTLE = 0.1          # the throttle lower bound during AI mode, in case the model outputs a too small values leading the car to stop
+
+# # Whether or not add extra control noise during user mode
+# # IF set to TRUE, random action noise (on steering angle and throttle) will be added during your tele-operation. 
+# # This can help you to collect more data that the car recovers from off-center and off-orientation mistakes, and then your trained agent will be more "intelligent"
+CONTROL_NOISE = True
+# THROTTLE_NOISE = 0.05          # should be > 0, then the range of throttle noise will be in [-THROTTLE_NOISE, THROTTLE_NOISE] (uniform random sampler), larger value leads to more difficult data collection
+# ANGLE_NOISE = 0.25             # should be > 0, then the range of steering noise will be in [-ANGLE_NOISE, ANGLE_NOISE] (uniform random sampler), larger value leads to more difficult data collection

@@ -37,7 +37,14 @@ def add_tub_save_data(V, cfg):
     if cfg.RECORD_DURING_AI:
         inputs += ['pilot/angle', 'pilot/throttle']
         types += ['float', 'float']
+    
+    if cfg.CONTROL_NOISE:
+        inputs += ['user/angle_noise', 'user/throttle_noise']
+        types += ['float', 'float']
 
+    inputs += ['angle', 'throttle']
+    types += ['float', 'float']
+    
     th = TubHandler(path=cfg.DATA_PATH)
     tub = th.new_tub_writer(inputs=inputs, types=types)
     V.add(tub, inputs=inputs, outputs=["tub/num_records"], run_condition='recording')
@@ -65,14 +72,64 @@ class DriveMode:
     def run(self, mode,
                 user_angle, user_throttle,
                 pilot_angle, pilot_throttle):
+        
+        if self.cfg.CONTROL_NOISE:
+            # only add noise if in user mode
+            throttle_noise = 0
+            angle_noise = 0
+
         if mode == 'user':
-            return user_angle, user_throttle
+            # for quick reverse
+            if user_throttle < 0 and user_throttle >= -0.3:
+                user_throttle = user_throttle * 1.5
+            
+            if self.cfg.CONTROL_NOISE:
+                # only apply noise it if user_throttle > 0
+                if user_throttle > 0:
+                    throttle_noise = round(random.uniform(-self.cfg.THROTTLE_NOISE,self.cfg.THROTTLE_NOISE),3) # 3 precision
+                    angle_noise = round(random.uniform(-self.cfg.ANGLE_NOISE, self.cfg.ANGLE_NOISE),3)
+                    
+                    user_angle += angle_noise
+                    user_throttle += throttle_noise
+
+                    # THROTTLE BOUND
+                    if user_throttle > 1.0:
+                        user_throttle = 1.0
+                    if user_throttle < 0.05:
+                        user_throttle = 0.05
+                    # STEERING ANGLE BOUND
+                    if user_angle > 1.0:
+                        user_angle = 1.0
+                    if user_angle < -1.0:
+                        user_angle = -1.0
+
+                return user_angle, user_throttle, angle_noise, throttle_noise
+            else:
+                return user_angle, user_throttle
 
         elif mode == 'local_angle':
-            return pilot_angle if pilot_angle else 0.0, user_throttle
+            if self.cfg.CONTROL_NOISE:
+                return pilot_angle if pilot_angle else 0.0, user_throttle, angle_noise, throttle_noise
+            else:
+                return pilot_angle if pilot_angle else 0.0
 
         else:
-            return pilot_angle if pilot_angle else 0.0, pilot_throttle * self.cfg.AI_THROTTLE_MULT if pilot_throttle else 0.0
+            pilot_throttle = pilot_throttle * self.cfg.AI_THROTTLE_MULT if pilot_throttle else 0.0
+            pilot_angle = pilot_angle if pilot_angle else 0.0
+            # THROTTLE BOUND
+            if pilot_throttle > self.cfg.AI_MAX_THROTTLE:
+                pilot_throttle = self.cfg.AI_MAX_THROTTLE
+            if pilot_throttle < self.cfg.AI_MIN_THROTTLE:
+                pilot_throttle = self.cfg.AI_MIN_THROTTLE
+            # STEER BOUND
+            if pilot_angle > 1.0:
+                pilot_angle = 1.0
+            if pilot_angle < -1.0:
+                pilot_angle = -1.0
+            if self.cfg.CONTROL_NOISE:
+                return pilot_angle, pilot_throttle,  angle_noise, throttle_noise
+            else:
+                return pilot_angle, pilot_throttle
 
 class AiRunCondition:
     '''
