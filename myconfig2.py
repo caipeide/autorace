@@ -98,7 +98,7 @@ PER_THROTTLE_STEP = 0.05
 RECORD_DURING_AI = True        #normally we do not record during ai mode. Set this to true to get image and steering records for your Ai. Be careful not to use them to train.
 
 # #Scale the output of the throttle of the ai pilot for all model types.
-# AI_THROTTLE_MULT = 1.0              # this multiplier will scale every throttle value for all output from NN models
+AI_THROTTLE_MULT = 1.0              # this multiplier will scale every throttle value for all output from NN models
 
 # Whether or not add extra control noise during user mode
-CONTROL_NOISE = True
+# CONTROL_NOISE = True

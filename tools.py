@@ -91,6 +91,12 @@ class DriveMode:
     def run(self, mode,
                 user_angle, user_throttle,
                 pilot_angle, pilot_throttle):
+        
+        if self.cfg.CONTROL_NOISE:
+            # only add noise when user mode
+            throttle_noise = 0
+            angle_noise = 0
+
         if mode == 'user':
             # for quick reverse
             if user_throttle < 0 and user_throttle >= -0.3:
@@ -98,8 +104,6 @@ class DriveMode:
             
             if self.cfg.CONTROL_NOISE:
                 # only apply it if user_throttle > 0
-                throttle_noise = 0
-                angle_noise = 0
                 if user_throttle > 0:
                     throttle_noise = round(random.uniform(-0.05,0.05),3) # 3 precision
                     angle_noise = round(random.uniform(-0.25, 0.25),3)
@@ -122,11 +126,11 @@ class DriveMode:
             else:
                 return user_angle, user_throttle
 
-
-            
-
         elif mode == 'local_angle':
-            return pilot_angle if pilot_angle else 0.0, user_throttle
+            if self.cfg.CONTROL_NOISE:
+                return pilot_angle if pilot_angle else 0.0, user_throttle, angle_noise, throttle_noise
+            else:
+                return pilot_angle if pilot_angle else 0.0
 
         else:
             pilot_throttle = pilot_throttle * self.cfg.AI_THROTTLE_MULT if pilot_throttle else 0.0
@@ -141,7 +145,10 @@ class DriveMode:
                 pilot_angle = 1.0
             if pilot_angle < -1.0:
                 pilot_angle = -1.0
-            return pilot_angle, pilot_throttle
+            if self.cfg.CONTROL_NOISE:
+                return pilot_angle, pilot_throttle,  angle_noise, throttle_noise
+            else:
+                return pilot_angle, pilot_throttle
 
 class AiRunCondition:
     '''
