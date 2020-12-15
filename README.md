@@ -1,5 +1,11 @@
 <div align=center>
 <img src=images/logo.png width="65%">
+
+![license](https://img.shields.io/github/license/caipeide/autorace)
+![code_size](https://img.shields.io/github/languages/code-size/caipeide/autorace)
+![total_Lines](https://img.shields.io/tokei/lines/github/caipeide/autorace)
+![last_update](https://img.shields.io/github/last-commit/caipeide/autorace)
+![stars](https://img.shields.io/github/stars/caipeide/autorace?style=social)
 </div>
 
 Autorace provides hardware components and example codes to achieve vision-based autonomous racing on RC-Cars. It is developed by RAM-LAB to support *the 1st autonomous RC-Car racing competition* in Hong Kong University of Science and Technology (HKUST). The competition data is Feb 26, 2021.
@@ -8,7 +14,7 @@ Autorace provides hardware components and example codes to achieve vision-based 
 
 **Keywords:** autonomous racing, visual navigation, artifical intelligence, deep learning.
 
-**Maintaners:** [Peide Cai](https://www.ram-lab.com/people/#mr-peide-cai) (PhD student from ECE, supervised by [Prof. Ming Liu](https://www.ram-lab.com/people/#dr-ming-liu-director))
+**Maintaners:** [Peide Cai](https://www.ram-lab.com/people/#mr-peide-cai) &lt;pcaiaa@connect.ust.hk&gt;
 
 📹 [RC-Car Racing Demo](https://sites.google.com/view/autorc-racing/)
 
