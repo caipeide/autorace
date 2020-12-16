@@ -29,7 +29,7 @@ Autorace provides hardware and example codes to achieve vision-based autonomous 
 
 If you like the project, give it a star ⭐. It means a lot to the people maintaining it 🧙.
 
-# Table of Contents <!-- omit in toc -->
+# Table of Contents <!-- omit in toc --> <span id=table-of-contents>
 - [Features](#features)
 - [Build a RC-Car](#build-a-rc-car)
 - [System Installation](#system-installation)
@@ -45,7 +45,9 @@ If you like the project, give it a star ⭐. It means a lot to the people mainta
   - [2. Your Host PC](#2-your-host-pc)
     - [2.1 Requirement](#21-requirement)
     - [2.2 Graphics Driver Installation](#22-graphics-driver-installation)
-    - [2.3 Environment Configuration](#23-environment-configuration)
+    - [2.3 System Configuration](#23-system-configuration)
+      - [2.3.1 Features](#231-features)
+      - [2.3.2 Installation](#232-installation)
     - [2.4 Test: Remote Connection between Host PC (or server) and RC-Car](#24-test-remote-connection-between-host-pc-or-server-and-rc-car)
 - [Train a Self-driving Car](#train-a-self-driving-car)
   - [1. Data Collection](#1-data-collection)
@@ -97,6 +99,8 @@ The RC-Car is named JetRacer, a high speed AI racing robot powered by Jetson Nan
 <div align=center>
 <img src=images/car_composing.gif width="65%">
 </div>
+
+[Back to Top](#table-of-contents)
 
 ## System Installation
 
@@ -194,6 +198,7 @@ $ sudo nvpmodel -q
 ```
 *m1: 5W power mode, m2: 10W power mode (MAXN)*
 
+[Back to Top](#table-of-contents)
 
 ### 2. Your Host PC
 > This is for model training
@@ -239,13 +244,36 @@ You can open a terminal and do `nvidia-smi` to check the running information of 
 <img src=images/nvidia-smi.png width="80%">
 </div>
 
-#### 2.3 Environment Configuration
+#### 2.3 System Configuration
+
+We provide a script `install_host.sh` for you to quickly configure your host PC (or server account) with all necessary dependencies for model training.
+
+##### 2.3.1 Features
+
+The following packages will be automatically installed:
+
+- [Miniconda](https://docs.conda.io/en/latest/miniconda.html): A package manager that helps you find and install packages.
+- Pytorch 1.6
+- OpenCV: An open source computer vision and machine learning software library. 
+- Matplotlib: A comprehensive library for creating static, animated, and interactive visualizations in Python.
+
+After configuring your system using `install_host.sh`, you can get started copying data between your host PC (or server account) and your RC-Car, and using the collected dataset to train your own self-driving car (will be introduced in the next section [Train a Self-driving Car](#train-a-self-driving-car))
+
+##### 2.3.2 Installation
+```console
+$ cd ~
+$ sudo apt install git
+$ git clone https://github.com/caipeide/autorace
+$ cd autorace
+$ sh ./install_host.sh
+```
 
 #### 2.4 Test: Remote Connection between Host PC (or server) and RC-Car
 
 ```console
 $ ssh -p 1234 team1@xx.xx.xx.xx
 ```
+[Back to Top](#table-of-contents)
 
 ## Train a Self-driving Car
 
