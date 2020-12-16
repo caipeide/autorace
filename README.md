@@ -54,8 +54,8 @@ If you like the project, give it a star ⭐. It means a lot to the people mainta
   - [3. Model Testing](#3-model-testing)
 - [Notes](#notes)
 - [Other Useful Toturials](#other-useful-toturials)
-  - [PyTorch](#pytorch)
   - [Python3](#python3)
+  - [PyTorch](#pytorch)
 - [Credits](#credits)
   
 ## Features
@@ -188,7 +188,7 @@ To ensure that the Jetson Nano doesn't draw more current than the battery pack c
 ```console
 $ sudo nvpmodel -m1
 ```
-- Check if mode is correct:
+- Check if mode is correct (or take a look at the car display):
 ```console
 $ sudo nvpmodel -q
 ```
@@ -206,6 +206,38 @@ $ sudo nvpmodel -q
 *For the participants who do not have a NVIDIA graphics card (GPU) in their computer, they can apply for using our server to train their models, and skip the following section 2.2*
 
 #### 2.2 Graphics Driver Installation
+
+> The following instructions refer to steps from [2 Ways to Install Nvidia Driver on Ubuntu 18.04 (GUI & Command Line)](https://www.linuxbabe.com/ubuntu/install-nvidia-driver-ubuntu-18-04). Here we simply choose to use graphical user interface (GUI) for installing the Nvidia driver.
+
+First, go to `system settings` > `details` and check what graphics card your computer is using. By default, your integrated graphics card (Intel HD Graphics) is being used.
+
+<div align=center>
+<img src=images/nvidia_driver_1.png width="80%">
+</div>
+
+Then open `softare & updates` program from you application menu. Click the `additional drivers` tab. You can see what driver is being used for Nvidia card. If you can not see `nvidia-driver-xxx` in the list, open a terminal and do `sudo apt update`, then re-open this window, and available drivers can be updated.
+
+<div align=center>
+<img src=images/nvidia_driver_0.png width="80%">
+</div>
+
+<div align=center>
+<img src=images/nvidia_driver_2.png width="80%">
+</div>
+
+As you can see many driver versions are available for the GeForce RTX 2080 Ti card on our server. Here we use the `nvidia-driver-440` and it works fine for our model training. There might be some other drivers for your particular Nvidia card. Click `Apply Changes` button to install the driver.
+
+After it’s installed, reboot your computer for the change to take effect. After that, go to `system settings` > `details`, you will see Ubuntu is using Nvidia graphics card.
+
+<div align=center>
+<img src=images/nvidia_driver_3.png width="80%">
+</div>
+
+You can open a terminal and do `nvidia-smi` to check the running information of your GPU:
+
+<div align=center>
+<img src=images/nvidia-smi.png width="80%">
+</div>
 
 #### 2.3 Environment Configuration
 
@@ -247,14 +279,15 @@ $ python manage.py drive --model models/resnet18_trt.pth --half --trt --type res
 
 ## Other Useful Toturials
 
+### Python3
+- [EN](https://www.learnpython.org/)
+- [中文](https://www.liaoxuefeng.com/wiki/1016959663602400)
+
 ### PyTorch
 - https://github.com/MorvanZhou/PyTorch-Tutorial
 - https://github.com/yunjey/pytorch-tutorial
 - https://pytorch.org/tutorials/beginner/deep_learning_60min_blitz.html
 
-### Python3
-- [EN](https://www.learnpython.org/)
-- [中文](https://www.liaoxuefeng.com/wiki/1016959663602400)
 
 ## Credits
 * [Donkeycar](https://github.com/autorope/donkeycar): Open source hardware and software platform to build a small scale self driving car.
