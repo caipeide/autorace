@@ -5,14 +5,15 @@
 ![code_size](https://img.shields.io/github/languages/code-size/caipeide/autorace)
 ![total_Lines](https://img.shields.io/tokei/lines/github/caipeide/autorace)
 ![last_update](https://img.shields.io/github/last-commit/caipeide/autorace)
-![stars](https://img.shields.io/github/stars/caipeide/autorace?style=social)
+[![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=Autonomous%20RC-Car%20Racing%20Competition%20in%20HKUST&url=https://github.com/caipeide/autorace&hashtags=rc_car,jetson_nano,deep_learning,visual_navigation,hkust)
+
 </div>
 
 <div align=center>
 <img src=images/demo.gif width="70%">
 </div>
 
-Autorace provides hardware components and example codes to achieve vision-based autonomous racing on RC-Cars. It is developed by [RAM-LAB](https://www.ram-lab.com/) to support *the 1st autonomous RC-Car racing competition* in Hong Kong University of Science and Technology (HKUST). The competition data is Feb 26, 2021 (tentative).
+Autorace provides hardware and example codes to achieve vision-based autonomous racing on RC-Cars. It is developed by [RAM-LAB](https://www.ram-lab.com/) to support *the 1st autonomous RC-Car racing competition* in Hong Kong University of Science and Technology (HKUST). The competition data is Feb 26, 2021 (tentative, due to COVID-19).
 
 **Event Collaborators**: School of Engineering, Robotics Institue (RI), Robotics and Multiperception Lab (RAM-LAB), Intelligent Autonomous Driving Center, Entrepreneurship Center
 
@@ -26,30 +27,38 @@ Autorace provides hardware components and example codes to achieve vision-based 
 
 🏁 [Rules and Regulations](https://www.ec.ust.hk/sites/default/files/1/HKUST%20Autonomous%20RC-car%20Racing%20Competition_1.pdf)
 
-
-
+If you like the project, give it a star ⭐. It means a lot to the people maintaining it 🧙.
 
 # Table of Contents <!-- omit in toc -->
-- [Featuress](#featuress)
+- [Features](#features)
 - [Build a RC-Car](#build-a-rc-car)
 - [System Installation](#system-installation)
-  - [Jetson Nano on the RC-Car](#jetson-nano-on-the-rc-car)
-  - [Your Host PC](#your-host-pc)
-    - [Server usage](#server-usage)
+  - [1. Jetson Nano on the RC-Car](#1-jetson-nano-on-the-rc-car)
+    - [1.1 Use JetPack to Install a Base Ubuntu System](#11-use-jetpack-to-install-a-base-ubuntu-system)
+      - [1.1.1 Features](#111-features)
+      - [1.1.2 Installation](#112-installation)
+      - [1.1.3 Caution](#113-caution)
+    - [1.2 Use JetCard to Quickly Configure the System](#12-use-jetcard-to-quickly-configure-the-system)
+      - [1.2.1 Features](#121-features)
+      - [1.2.2 Installation](#122-installation)
+      - [1.2.3 Tips](#123-tips)
+  - [2. Your Host PC](#2-your-host-pc)
+    - [2.1 Requirement](#21-requirement)
+    - [2.2 Graphics Driver Installation](#22-graphics-driver-installation)
+    - [2.3 Environment Configuration](#23-environment-configuration)
+    - [2.4 Test: Remote Connection between Host PC (or server) and RC-Car](#24-test-remote-connection-between-host-pc-or-server-and-rc-car)
 - [Train a Self-driving Car](#train-a-self-driving-car)
-  - [Data Collection](#data-collection)
-  - [Model Training](#model-training)
-    - [Accelerate your model](#accelerate-your-model)
-  - [Model Testing](#model-testing)
+  - [1. Data Collection](#1-data-collection)
+  - [2. Model Training](#2-model-training)
+    - [2.1 Accelerate your Model](#21-accelerate-your-model)
+  - [3. Model Testing](#3-model-testing)
 - [Notes](#notes)
 - [Other Useful Toturials](#other-useful-toturials)
   - [PyTorch](#pytorch)
   - [Python3](#python3)
-  - [Deep Learning](#deep-learning)
-  - [Jetson Nano](#jetson-nano)
 - [Credits](#credits)
   
-## Featuress
+## Features
 * Coding language: *Python3*
 * Deep learning framework: [*PyTorch 1.6*](https://pytorch.org/)
 * On-board computer: [*Jetson Nano B1*](https://www.nvidia.com/en-us/autonomous-machines/embedded-systems/jetson-nano/)
@@ -59,38 +68,148 @@ Autorace provides hardware components and example codes to achieve vision-based 
 
     1. Build a small but powerful RC-Car that can drive itself.
     2. Record driving data (camera images, control actions) by teleoperating the RC-Car.
-    3. Train different AI autopilots to drive your car on the track as fast as possible.
+    3. Train different AI autopilots to autonomously drive your car on the track as fast as possible.
     4. Autonomous collision avoidance around different obstacles.
 
+
 ## Build a RC-Car
+
+The RC-Car is named JetRacer, a high speed AI racing robot powered by Jetson Nano. 
+
 <div align=center>
 <img src=images/car.jpg width="60%">
 </div>
 
-The RC-Car is named JetRacer, a high speed AI racing robot powered by Jetson Nano.
+<div align=center>
+<img src=images/components.jpg width="100%">
+</div>
 
-Website: [中文](https://www.waveshare.net/shop/JetRacer-Pro-AI-Kit.htm) | [EN](https://www.waveshare.com/product/ai/robots/mobile-robots/jetracer-pro-ai-kit.htm) 
+**Website**: [中文](https://www.waveshare.net/shop/JetRacer-Pro-AI-Kit.htm) | [EN](https://www.waveshare.com/product/ai/robots/mobile-robots/jetracer-pro-ai-kit.htm) 
 
-JetRacer WiKi: [中文](https://www.waveshare.net/wiki/JetRacer_Pro_AI_Kit) | [EN](https://www.waveshare.com/wiki/JetRacer_Pro_AI_Kit)
+**JetRacer WiKi**: [中文](https://www.waveshare.net/wiki/JetRacer_Pro_AI_Kit) | [EN](https://www.waveshare.com/wiki/JetRacer_Pro_AI_Kit)
 
 > Some parts of the user guides on software in the above wiki (provided by the vendor) are out-of-date (you may meet different errors during tests). Please follow this repository for system and software installation in the following sections, and just take the above wiki as a reference.
 
-Assemble Manusal: [中文](images/Jetracer_pro_Assembly_CN.pdf) | [EN](images/Jetracer_pro_Assembly_EN.pdf) 
+**Assemble Manusal**: [中文](images/Jetracer_pro_Assembly_CN.pdf) | [EN](images/Jetracer_pro_Assembly_EN.pdf) 
 
-Slides and Assemble Video: [Link](https://sites.google.com/view/autorc-racing/workshops#h.2vgfpvidyayt)
+**Slides and Assemble Video**: [Link](https://sites.google.com/view/autorc-racing/workshops#h.2vgfpvidyayt)
 
+<div align=center>
+<img src=images/car_composing.gif width="65%">
+</div>
 
 ## System Installation
 
-### Jetson Nano on the RC-Car 
-*This is for data collection and model deployment*
+### 1. Jetson Nano on the RC-Car 
+> This is for data collection and model deployment, covered in our [2nd workshop](https://sites.google.com/view/autorc-racing/workshops?authuser=0#h.k8kmaurf4zv0) with slides and videos.
 
-### Your Host PC
-*This is for AI model training*
+[NVIDIA Jetson Nano](https://www.nvidia.com/en-us/autonomous-machines/embedded-systems/jetson-nano/) lets you bring incredible new capabilities to millions of small, power-efficient AI systems. It is also the perfect tool to start learning about AI and robotics in real-world settings, with ready-to-try projects and the support of an active and passionate developer community. 
+
+<div align=center>
+<img src=images/jetson_nano.jpg width="50%">
+</div>
+
+To use this mainboard, we need to install a software development kit on it, which is named JetPack 👇
+
+#### 1.1 Use JetPack to Install a Base Ubuntu System
 
 
-*For the participants who do not have a NVIDIA graphics card (GPU) in their computer, they can apply for using a server to train their models.*
-#### Server usage
+##### 1.1.1 Features
+> Based on the introduction in https://developer.nvidia.com/jetpack-sdk-44-archive
+
+[JetPack SDK](https://developer.nvidia.com/jetpack-sdk-44-archivek) is the most comprehensive solution for building AI applications. It includes the latest Linux Driver Package (L4T) with Linux operating system named Ubuntu (version: 18.04) and CUDA-X accelerated libraries and APIs for Deep Learning, Computer Vision, Accelerated Computing and Multimedia. It also includes samples, documentation, and developer tools for both host computer and developer kit. 
+
+*In this project we use [JetPack 4.4](https://developer.nvidia.com/jetson-nano-sd-card-image-44
+).*
+
+##### 1.1.2 Installation
+
+JetPack installation is quite simple: Flash the image to a microSD card -> Connect Nano to a display and boot the system (Ubuntu 18.04) -> Finish initialization. **Step-by-step instructions** are from Page 4 - Page 23 in [this slides](https://sites.google.com/view/autorc-racing/workshops?authuser=0#h.k8kmaurf4zv0) from workshop#2. Then you will enter the Ubuntu 18.04 system, which looks like the following:
+
+<div align=center>
+<img src=images/jetpack.png width="70%">
+</div>
+
+##### 1.1.3 Caution
+
+Remember do not upgrade the system after installation, even the system reminds you of that. Because some of our library dependencies rely on the current version of jetpack, which is 4.4.
+
+
+#### 1.2 Use JetCard to Quickly Configure the System
+
+After installing the Ubuntu 18.04 system with JetPack4.4, we provide a system configuration named JetCard to make it easy to get started with AI on Jetson Nano. Simply execute the provided script and all external library dependencies will be installed automatically.
+
+##### 1.2.1 Features
+
+JetCard comes pre-loaded with:
+
+* A Jupyter Lab server that starts on boot for easy web programming
+* A script to display the Jetson Nano's IP address, CPU & GPU usage, battery life, charging status, etc.
+* The popular deep learning frameworks [PyTorch](https://pytorch.org/) (version: 1.6)
+* A Python3 library to drive RC-Cars [Donkeycar](https://github.com/caipeide/donkeycar)
+* Other development tools such as [Oh My Zsh](https://github.com/ohmyzsh/ohmyzsh), [virtualenv](https://pypi.org/project/virtualenv/), [torch2trt](https://github.com/NVIDIA-AI-IOT/torch2trt)
+
+After configuring your system using JetCard, you can get started prototyping AI projects from your web browser in Python3.
+
+##### 1.2.2 Installation
+
+
+After you install [JetPack 4.4](https://developer.nvidia.com/jetpack-sdk-44-archive) on the SD card, boot the system (Ubuntu 18.04) and open a terminal by pressing `Ctrl+Alt+T`, and then do the followings to use JetCard to quickly configure your system:
+
+```console
+$ cd ~
+$ git clone https://github.com/caipeide/jetcard
+$ cd jetcard
+$ sh ./install.sh <password>
+```
+
+<div align=center>
+<img src=images/jetcard_install.gif width="80%">
+</div>
+
+
+The whole installation will cost about 40 min. After that the script will ask you to reboot. Take a look at the ip address shown on the display (10.79.157.13 in this case).
+
+<div align=center>
+<img src=images/display.jpg width="50%">
+</div>
+
+Now you can disconnect the HDMI port, keyboard and mouse on the jetson nano and start remote development: Open a browser on your own laptop and enter `10.79.157.13:8888` for remote connection to and development on the car. (the `<password>` you set earlier will be asked to enter the jupyterlab)
+
+<div align=center>
+<img src=images/jupyterlab.png width="80%">
+</div>
+
+##### 1.2.3 Tips
+
+To ensure that the Jetson Nano doesn't draw more current than the battery pack can supply, place the Jetson Nano in 5W mode by calling the following command.
+
+- You need to launch a new Terminal (by pressing `Ctrl+Alt+T`) and enter following commands to select 5W power mode:
+```console
+$ sudo nvpmodel -m1
+```
+- Check if mode is correct:
+```console
+$ sudo nvpmodel -q
+```
+*m1: 5W power mode, m2: 10W power mode (MAXN)*
+
+
+### 2. Your Host PC
+> This is for model training
+
+#### 2.1 Requirement
+
+* Nvidia GPU (at least with 6 GB frame buffer), e.g., RTX 2060, GTX 1080.
+* Ubuntu 18.04 system should be installed.
+
+*For the participants who do not have a NVIDIA graphics card (GPU) in their computer, they can apply for using our server to train their models, and skip the following section 2.2*
+
+#### 2.2 Graphics Driver Installation
+
+#### 2.3 Environment Configuration
+
+#### 2.4 Test: Remote Connection between Host PC (or server) and RC-Car
 
 ```console
 $ ssh -p 1234 team1@xx.xx.xx.xx
@@ -98,32 +217,33 @@ $ ssh -p 1234 team1@xx.xx.xx.xx
 
 ## Train a Self-driving Car
 
-### Data Collection
+### 1. Data Collection
 Randomly place different obstacles on the track.
 
 ```console
 $ python manage.py drive --js
 ```
 
-### Model Training
+### 2. Model Training
 ```console
 $ python manage.py train --model models/resnet18.pth --type resnet18
 ```
 
-#### Accelerate your model
+#### 2.1 Accelerate your Model
 ```console
 $ python accel_model.py --model models/resnet18.pth --half --type resnet18
 ```
-### Model Testing
+### 3. Model Testing
 ```console
 $ python manage.py drive --model models/resnet18_trt.pth --half --trt --type resnet18
 ```
 
 ## Notes
 
-1. Remember to configure the system on Jetson Nano to 5W mode to increase battery life (default: MAXN) `sudo nvpmodel -m1`
-2. Do not directly turn off the power when system is running. Open a terminal and do`sudo shutdown`first to shutdown the OS system, then turn off the power.
-3. If the RC-Car crashes into the track fence at a high speed, the front wheels are likely to get stuck at their drive rods. Then you need to remove the two drive rods and reinstall them, which is a little troublesome. *It is suggested to simply remove the drive rod of the two front wheels, then this problem can be solved.*
+1. Do not directly turn off the power when system is running. Open a terminal and do`sudo shutdown`first to shutdown the OS system, then turn off the power.
+2. If the RC-Car crashes into the track fence at a high speed, the front wheels are likely to get stuck at their drive rods. Then you have to remove the two drive rods and reinstall them, which is a little troublesome. *It is suggested to simply removing the drive rod of the two front wheels, then this problem can be solved.* **Other hardware modifications are not allowed.**
+3. You are free to DIY your own algorithms to drive the car for competition, but the following functions in this repo should be kept:
+   1. Press `ENTER` to start the car immediately when using autopilot mode
 
 ## Other Useful Toturials
 
@@ -133,14 +253,12 @@ $ python manage.py drive --model models/resnet18_trt.pth --half --trt --type res
 - https://pytorch.org/tutorials/beginner/deep_learning_60min_blitz.html
 
 ### Python3
-
-### Deep Learning
-
-### Jetson Nano
-
+- [EN](https://www.learnpython.org/)
+- [中文](https://www.liaoxuefeng.com/wiki/1016959663602400)
 
 ## Credits
 * [Donkeycar](https://github.com/autorope/donkeycar): Open source hardware and software platform to build a small scale self driving car.
 * [JetRacer](https://github.com/NVIDIA-AI-IOT/jetracer): An autonomous AI racecar using NVIDIA Jetson Nano.
-* [Jetcard](https://github.com/NVIDIA-AI-IOT/jetcard): An SD card image for web programming AI projects with NVIDIA Jetson Nano.
+* [Jetcard](https://github.com/NVIDIA-AI-IOT/jetcard/tree/jetpack_4.4): An SD card image for web programming AI projects with NVIDIA Jetson Nano.
 * [torch2trt](https://github.com/NVIDIA-AI-IOT/torch2trt): An easy to use PyTorch to TensorRT converter for model acceleration. Real-time computing performance is important for our high-speed driving occasions.
+* [Getting Started with Jetson Nano Developer Kit](https://developer.nvidia.com/embedded/learn/get-started-jetson-nano-devkit#intro)
