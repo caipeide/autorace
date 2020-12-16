@@ -269,6 +269,10 @@ $ sudo apt install git
 $ git clone https://github.com/caipeide/autorace
 $ cd autorace
 $ sh ./install_host.sh
+$ source ~/.bashrc
+$ conda create -n autorace python=3.6 -y
+$ conda activate autorace
+$ sh ./install_host_continue.sh
 ```
 *Note*: The second command `sudo apt install git` is not needed on our server.
 
