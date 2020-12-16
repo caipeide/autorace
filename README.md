@@ -49,6 +49,8 @@ If you like the project, give it a star ⭐. It means a lot to the people mainta
       - [2.3.1 Features](#231-features)
       - [2.3.2 Installation](#232-installation)
     - [2.4 Test: Remote Connection between Host PC (or server) and RC-Car](#24-test-remote-connection-between-host-pc-or-server-and-rc-car)
+      - [2.4.1 RC-Car <--> Host PC](#241-rc-car----host-pc)
+      - [2.4.2 Server Account <--> Host PC](#242-server-account----host-pc)
 - [Train a Self-driving Car](#train-a-self-driving-car)
   - [1. Car Steering Calibration](#1-car-steering-calibration)
   - [2. Data Collection](#2-data-collection)
@@ -268,9 +270,13 @@ $ git clone https://github.com/caipeide/autorace
 $ cd autorace
 $ sh ./install_host.sh
 ```
+*Note*: The second command `sudo apt install git` is not needed on our server.
 
 #### 2.4 Test: Remote Connection between Host PC (or server) and RC-Car
 
+##### 2.4.1 RC-Car <--> Host PC 
+
+##### 2.4.2 Server Account <--> Host PC 
 ```console
 $ ssh -p 1234 team1@xx.xx.xx.xx
 ```
