@@ -50,10 +50,11 @@ If you like the project, give it a star ⭐. It means a lot to the people mainta
       - [2.3.2 Installation](#232-installation)
     - [2.4 Test: Remote Connection between Host PC (or server) and RC-Car](#24-test-remote-connection-between-host-pc-or-server-and-rc-car)
 - [Train a Self-driving Car](#train-a-self-driving-car)
-  - [1. Data Collection](#1-data-collection)
-  - [2. Model Training](#2-model-training)
-    - [2.1 Accelerate your Model](#21-accelerate-your-model)
-  - [3. Model Testing](#3-model-testing)
+  - [1. Car Steering Calibration](#1-car-steering-calibration)
+  - [2. Data Collection](#2-data-collection)
+  - [3. Model Training](#3-model-training)
+    - [3.1 Accelerate your Model](#31-accelerate-your-model)
+  - [4. Model Testing](#4-model-testing)
 - [Notes](#notes)
 - [Other Useful Toturials](#other-useful-toturials)
   - [Python3](#python3)
@@ -250,12 +251,12 @@ We provide a script `install_host.sh` for you to quickly configure your host PC 
 
 ##### 2.3.1 Features
 
-The following packages will be automatically installed:
+By executing the script, the following packages will be automatically installed:
 
-- [Miniconda](https://docs.conda.io/en/latest/miniconda.html): A package manager that helps you find and install packages.
-- Pytorch 1.6
+- [Miniconda](https://docs.conda.io/en/latest/miniconda.html): A package manager that helps you find and install packages. Then a new conda environement named `autorace` will be automatically created
 - OpenCV: An open source computer vision and machine learning software library. 
 - Matplotlib: A comprehensive library for creating static, animated, and interactive visualizations in Python.
+- Other tools such as Pytorch 1.6 and [Oh My Zsh](https://github.com/ohmyzsh/ohmyzsh)
 
 After configuring your system using `install_host.sh`, you can get started copying data between your host PC (or server account) and your RC-Car, and using the collected dataset to train your own self-driving car (will be introduced in the next section [Train a Self-driving Car](#train-a-self-driving-car))
 
@@ -277,23 +278,25 @@ $ ssh -p 1234 team1@xx.xx.xx.xx
 
 ## Train a Self-driving Car
 
-### 1. Data Collection
+### 1. Car Steering Calibration
+
+### 2. Data Collection
 Randomly place different obstacles on the track.
 
 ```console
 $ python manage.py drive --js
 ```
 
-### 2. Model Training
+### 3. Model Training
 ```console
 $ python manage.py train --model models/resnet18.pth --type resnet18
 ```
 
-#### 2.1 Accelerate your Model
+#### 3.1 Accelerate your Model
 ```console
 $ python accel_model.py --model models/resnet18.pth --half --type resnet18
 ```
-### 3. Model Testing
+### 4. Model Testing
 ```console
 $ python manage.py drive --model models/resnet18_trt.pth --half --trt --type resnet18
 ```
