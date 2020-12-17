@@ -48,9 +48,6 @@ If you like the project, give it a star ⭐. It means a lot to the people mainta
     - [2.3 System Configuration](#23-system-configuration)
       - [2.3.1 Features](#231-features)
       - [2.3.2 Installation](#232-installation)
-    - [2.4 Test: Remote Connection between Host PC (or server) and RC-Car](#24-test-remote-connection-between-host-pc-or-server-and-rc-car)
-      - [2.4.1 RC-Car <--> Host PC](#241-rc-car----host-pc)
-      - [2.4.2 Server Account <--> Host PC](#242-server-account----host-pc)
 - [Train a Self-driving Car](#train-a-self-driving-car)
   - [1. Car Steering Calibration](#1-car-steering-calibration)
   - [2. Data Collection](#2-data-collection)
@@ -256,16 +253,25 @@ We provide a script `install_host.sh` for you to quickly configure your host PC 
 By executing the script, the following packages will be automatically installed:
 
 - [Miniconda](https://docs.conda.io/en/latest/miniconda.html): A package manager that helps you find and install packages. Then a new conda environement named `autorace` will be automatically created
-- OpenCV: An open source computer vision and machine learning software library. 
-- Matplotlib: A comprehensive library for creating static, animated, and interactive visualizations in Python.
-- Other tools such as Pytorch 1.6 and [Oh My Zsh](https://github.com/ohmyzsh/ohmyzsh)
+- OpenCV: An open source computer vision and machine learning software library
+- Matplotlib: A comprehensive library for creating static, animated, and interactive visualizations in Python
+- Other tools such as Pytorch 1.6 and Donkeycar
 
-After configuring your system using `install_host.sh`, you can get started copying data between your host PC (or server account) and your RC-Car, and using the collected dataset to train your own self-driving car (will be introduced in the next section [Train a Self-driving Car](#train-a-self-driving-car))
+After configuring your system, you can get started transmitting data between your host PC (or server account) and your RC-Car (via `ssh`), and using the collected dataset to train your own self-driving car (will be introduced in the next section [Train a Self-driving Car](#train-a-self-driving-car))
 
 ##### 2.3.2 Installation
+
+- If you are using your host PC, open a terminal and do the first three steps first in the following (they are already installed on the server)
+
+```console
+$ sudo apt update
+$ sudo apt install openssh-server
+$ sudo apt install git
+```
+- Then you can install the other dependencies.
+
 ```console
 $ cd ~
-$ sudo apt install git
 $ git clone https://github.com/caipeide/autorace
 $ cd autorace
 $ sh ./install_host.sh
@@ -274,16 +280,7 @@ $ conda create -n autorace python=3.6 -y
 $ conda activate autorace
 $ sh ./install_host_continue.sh
 ```
-*Note*: The second command `sudo apt install git` is not needed on our server.
 
-#### 2.4 Test: Remote Connection between Host PC (or server) and RC-Car
-
-##### 2.4.1 RC-Car <--> Host PC 
-
-##### 2.4.2 Server Account <--> Host PC 
-```console
-$ ssh -p 1234 team1@xx.xx.xx.xx
-```
 [Back to Top](#table-of-contents)
 
 ## Train a Self-driving Car
@@ -298,6 +295,11 @@ $ python manage.py drive --js
 ```
 
 ### 3. Model Training
+
+```console
+$ scp -P 1234 team1@xx.xx.xx.xx
+```
+
 ```console
 $ python manage.py train --model models/resnet18.pth --type resnet18
 ```
