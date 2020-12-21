@@ -8,3 +8,5 @@ models/*
 .ipynb_checkpoints
 __pycache__
 .vscode/*
+
+Thumbs.db

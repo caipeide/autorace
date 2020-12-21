@@ -19,7 +19,7 @@ Autorace provides hardware and example codes to achieve vision-based autonomous 
 
 **Keywords:** autonomous racing, visual navigation, artifical intelligence, deep learning.
 
-**Maintaners:** [Peide Cai](https://www.ram-lab.com/people/#mr-peide-cai) &lt;pcaiaa@connect.ust.hk&gt;
+**Maintaners:** [Peide Cai](https://www.ram-lab.com/people/#mr-peide-cai) &lt;pcaiaa@connect.ust.hk&gt; &emsp; **Supervisor:** [Prof. Ming Liu](https://www.ram-lab.com/people/#dr-ming-liu-director) &lt;eelium@ust.hk&gt;
 
 💻 [Official Website](https://ecenter.ust.hk/events/hkust-autonomous-rc-car-racing-competition)
 
@@ -27,7 +27,9 @@ Autorace provides hardware and example codes to achieve vision-based autonomous 
 
 🏁 [Rules and Regulations](https://www.ec.ust.hk/sites/default/files/1/HKUST%20Autonomous%20RC-car%20Racing%20Competition_1.pdf)
 
-If you like the project, give it a star ⭐. It means a lot to the people maintaining it 🧙.
+If you meet with any problems, feel free to create an [issue](https://github.com/caipeide/autorace/issues) to let me and other participants know, then we can solve it together 🌞
+
+If you like the project, give it a star ⭐. It means a lot to the people maintaining it 🧙
 
 # Table of Contents <!-- omit in toc --> <span id=table-of-contents>
 - [Features](#features)
@@ -48,9 +50,19 @@ If you like the project, give it a star ⭐. It means a lot to the people mainta
     - [2.3 System Configuration](#23-system-configuration)
       - [2.3.1 Features](#231-features)
       - [2.3.2 Installation](#232-installation)
-- [Train a Self-driving Car](#train-a-self-driving-car)
-  - [1. Car Steering Calibration](#1-car-steering-calibration)
+- [Start Your Journey of Self-Driving](#start-your-journey-of-self-driving)
+  - [1. Steering Calibration](#1-steering-calibration)
+    - [1.1 Configuration Files](#11-configuration-files)
+    - [1.2 Calibration](#12-calibration)
+    - [1.3 Fine Tuning and Testing Your Calibration](#13-fine-tuning-and-testing-your-calibration)
   - [2. Data Collection](#2-data-collection)
+    - [2.1 Driving with Web Controller](#21-driving-with-web-controller)
+      - [2.1.1 Features](#211-features)
+      - [2.1.2 Keyboard Shortcuts](#212-keyboard-shortcuts)
+    - [2.2 Driving with Physical Joystick Controller](#22-driving-with-physical-joystick-controller)
+      - [2.2.1 Features](#221-features)
+      - [2.2.2 User Guide](#222-user-guide)
+      - [2.2.3 Data Collection Tips](#223-data-collection-tips)
   - [3. Model Training](#3-model-training)
     - [3.1 Accelerate your Model](#31-accelerate-your-model)
   - [4. Model Testing](#4-model-testing)
@@ -283,16 +295,140 @@ $ sh ./install_host_continue.sh
 
 [Back to Top](#table-of-contents)
 
-## Train a Self-driving Car
+## Start Your Journey of Self-Driving
 
-### 1. Car Steering Calibration
+### 1. Steering Calibration
 
-### 2. Data Collection
-Randomly place different obstacles on the track.
+#### 1.1 Configuration Files 
+
+All of the car's settings are in the `config.py` and `myconfig.py` scripts. `config.py` stores the default values for all parameterss, and you can adjust these settings in `myconfig.py` by *uncommenting* related lines and *changing* their values. When the main program `manage.py` starts, it will first read `config.py` and then override the variables with values you set in `myconfig.py`. 
+
+You can edit this file using two methods:
+
+- If you are in a terminal, you can use [nano](https://serverpilot.io/docs/how-to-use-nano-to-edit-files/) to edit files:
 
 ```console
+nano ~/autorace/myconfig.py
+```
+
+- If you perfer GUI, you can directly edit files in Jupyter Lab. Just double-click a file, make changes, and `Ctrl+S` to save.
+
+Here *uncomment* means deleting the `#` symbol at the beginning of lines. In most editors, you can toggle between the *comment* and *uncomment* status by pressing `Ctrl+/`.
+
+#### 1.2 Calibration
+
+> Make sure your car is off the ground to prevent a runaway situation.
+
+<div align=center>
+<img src=images/off_the_ground.jpg width="50%">
+</div>
+
+1. Turn on your car and the motor, and connect to the car via Jupter Lab on your PC.
+2. Open a terminal and run `donkey calibrate --channel 0 --bus=1`
+3. Enter 320 and you should see the wheels on your car move slightly. If not enter 400 or 300.
+4. Next enter values +/- 10 from your starting value to find the PWM setting that makes your car turn all the way left and all the way right. Remember these values.
+5. Enter these values in `myconfig.py` script as `STEERING_RIGHT_PWM` and `STEERING_LEFT_PWM`. Note that the default vaules are `STEERING_LEFT_PWM = 460`,
+`STEERING_RIGHT_PWM = 290`, saved in `config.py`.
+
+**Note**: You need to make sure that the value `(STEERING_LEFT_PWM + STEERING_RIGHT_PWM)*0.5` can make the front wheels face straight ahead, then the car can drive in a straight line with `steering = 0`.
+
+#### 1.3 Fine Tuning and Testing Your Calibration
+
+Now that you have your car roughly calibrated you can try driving it to verify that it drives as expected. Here's how to fine tune your car's calibration. 
+
+1. Start your car by running `python manage.py drive` in this folder.
+2. Go to `<car_ip_address>:8887` in a browser (Tested on [Chrome](https://www.google.com/chrome/)). The following is what you will see: camera video streams, adjustable control values and driving modes. Now you can press `J` or `L` on keyboard to adjust the car steering to left or right, and use `I` and `K` to adjust the throttle values.
+
+<div align=center>
+<span id=drive-ui>
+<img src=images/drive_UI.png width="70%">
+</div>
+
+
+3. Now set the steering to *zero* and press `I` a few times to get the car to go forward. If it goes straight, that is good and you can move on to the next section; if not, adjust your values of `STEERING_LEFT_PWM` and `STEERING_RIGHT_PWM` until a straight driving trajectory can be achieved.
+
+**Note**: Too small throttle values, e.g., 0.1, may not be enough to drive the car. You need to increase it a bit.
+
+
+### 2. Data Collection
+
+#### 2.1 Driving with Web Controller
+> Only for basic testing. If you want to collect data in a more flexible way, use the joystick introduced in the next section [Driving with Physical Joystick Controller](#22-driving-with-physical-joystick-controller)
+
+This controller provides a [UI window](#drive-ui) accesable at `<car_ip_address>:8887`. After you run `python manage.py drive` this module will be loaded.
+
+##### 2.1.1 Features
+
+- *Pilot mode* - Choose this if the pilot should control the angle and/or throttle. It has three options: 
+  - `local_angle` will only let the pilot model control the angle of the car.
+  - `local_pilot` will let the pilot model control both the angle and throttle. 
+  - `user_mode` where you have full control over the car using keyboard shortcuts or mouse.
+  
+  &nbsp;&nbsp;&nbsp;**Notes**
+  - Switches to pilot modes will only take effect if you load your neural network model when starting the `manage.py`, which will be introduced in [Model Testing](#4-model-testing).
+  - Clicking with mouse on the right blue area (with texts "Click/touch to use joystic") will switch from `pilot` modes to `user_mode`. You can use this function to quickly stop your self-driving car.
+
+- *Recording* - Press record data to start recording images, steering angels and throttle values. By default the data will be automatically recorded if throttle is not zero in `user_mode`. If the car is in pilot mode, you can use this function to manually record some self-driving data. **Note** do not use the data from a pilot mode to train you netowrk. Training details will be covered in [Model Training](#3-model-training).
+  
+- Throttle mode - Option to set the throttle as constant. This is used in races if you have a pilot that will steer but doesn't control throttle.
+
+- Max throttle - Select the maximum throttle for `user_mode`.
+
+##### 2.1.2 Keyboard Shortcuts
+
+- `R` : toggle recording
+- `I` : increase throttle by 0.05
+- `K` : decrease throttle by 0.05
+- `J` : turn left
+- `L` : turn right
+
+**Note**: Throttle range and steering range are both [-1.0, 1.0]. Throttle values that are less than 0 indicate reversing.
+
+#### 2.2 Driving with Physical Joystick Controller
+
+##### 2.2.1 Features
+
+- Recommended for data collection, much more flexible than web controller.
+- By default, no UI interface is published in this mode. However, you can set `USE_FPV = True` in `myconfig.py` to monitor the camera video streams. The published FPV images are accessible in `<car_ip_address>:8890`
+
+##### 2.2.2 User Guide
+
+- Start the program (before that, make sure your car motor is powered on)
+
+```console
+$ cd ~/autorace
 $ python manage.py drive --js
 ```
+> Optionally, if you want joystick use to be sticky and don't want to add the `--js` each time, modify your `myconfig.py` so that `USE_JOYSTICK_AS_DEFAULT = True`
+
+- The joystick controls are shown as follows, they will also be printed on your sceen afer running the above commands.
+
+```console
++------------------+--------------------------+
+|     control      |          action          |
++------------------+--------------------------+
+|     a_button     |       toggle_mode        |
+|     b_button     | toggle_manual_recording  |
+|     x_button     |   erase_last_N_records   |
+|     y_button     |      emergency_stop      |
+|  right_shoulder  |  increase_max_throttle   |
+|  left_shoulder   |  decrease_max_throttle   |
+|     options      | toggle_constant_throttle |
+| left_stick_horz  |       set_steering       |
+| right_stick_vert |       set_throttle       |
+|  right_trigger   |    constant_rage_mode    |
+|   left_trigger   |   constant_gentle_mode   |
++------------------+--------------------------+
+```
+
+- Explainations on the actions
+  - toggle_mode: switches modes - "User, Local Angle, Local(angle and throttle)"
+  - 
+
+
+##### 2.2.3 Data Collection Tips
+Randomly place different obstacles on the track.
+recording will be on if the throttle is not zero.
 
 ### 3. Model Training
 
@@ -313,12 +449,22 @@ $ python accel_model.py --model models/resnet18.pth --half --type resnet18
 $ python manage.py drive --model models/resnet18_trt.pth --half --trt --type resnet18
 ```
 
+[Back to Top](#table-of-contents)
+
 ## Notes
 
 1. Do not directly turn off the power when system is running. Open a terminal and do`sudo shutdown`first to shutdown the OS system, then turn off the power.
 2. If the RC-Car crashes into the track fence at a high speed, the front wheels are likely to get stuck at their drive rods. Then you have to remove the two drive rods and reinstall them, which is a little troublesome. *It is suggested to simply removing the drive rod of the two front wheels, then this problem can be solved.* **Other hardware modifications are not allowed.**
 3. You are free to DIY your own algorithms to drive the car for competition, but the following functions in this repo should be kept:
    1. Press `ENTER` to start the car immediately when using autopilot mode
+4. If you think writing programs with Jupyter Lab is boring because it lacks code navigation functins like `go to defination` and `code suggestions`, you can choose [VSCode](https://code.visualstudio.com/) for development.
+   
+>Visual Studio Code has a high productivity code editor which, when combined with programming language services, gives you the power of an IDE and the speed of a text editor. [In this topic](https://code.visualstudio.com/docs/editor/editingevolved#_quick-file-navigation), we'll first describe VS Code's language intelligence features (suggestions, parameter hints, smart code navigation) and then show the power of the core text editor.
+
+After installation, you can install the `Remote - SSH` extension within VSCode to let your editor connected to your RC-Car. The following is a video demo showing how.
+
+
+[Back to Top](#table-of-contents)
 
 ## Other Useful Toturials
 
