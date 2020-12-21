@@ -61,8 +61,9 @@ If you like the project, give it a star ⭐. It means a lot to the people mainta
       - [2.1.2 Keyboard Shortcuts](#212-keyboard-shortcuts)
     - [2.2 Driving with Physical Joystick Controller](#22-driving-with-physical-joystick-controller)
       - [2.2.1 Features](#221-features)
-      - [2.2.2 User Guide](#222-user-guide)
-      - [2.2.3 Data Collection Tips](#223-data-collection-tips)
+      - [2.2.2 Start the Programm for Data Collection](#222-start-the-programm-for-data-collection)
+      - [2.2.3 Data Collection Procedure](#223-data-collection-procedure)
+      - [2.2.4 Tips](#224-tips)
   - [3. Model Training](#3-model-training)
     - [3.1 Accelerate your Model](#31-accelerate-your-model)
   - [4. Model Testing](#4-model-testing)
@@ -370,9 +371,9 @@ This controller provides a [UI window](#drive-ui) accessible at `<car_ip_address
 
 - *Recording* - Press record data to start recording images, steering angels and throttle values. By default the data will be automatically recorded if throttle is not zero in `user_mode`. If the car is in pilot mode, you can use this function to manually record some self-driving data. **Note** do not use the data from a pilot mode to train you netowrk. Training details will be covered in [Model Training](#3-model-training).
   
-- Throttle mode - Option to set the throttle as constant. This is used in races if you have a pilot that will steer but doesn't control throttle.
+- *Throttle mode* - Option to set the throttle as constant. This is used in races if you have a pilot that will steer but doesn't control throttle.
 
-- Max throttle - Select the maximum throttle for `user_mode`.
+- *Max throttle* - Select the maximum throttle for `user_mode`.
 
 ##### 2.1.2 Keyboard Shortcuts
 
@@ -391,9 +392,9 @@ This controller provides a [UI window](#drive-ui) accessible at `<car_ip_address
 - Recommended for data collection, much more flexible to operate the RC-Car than using web controller.
 - By default, no UI interface is published in this mode. However, you can set `USE_FPV = True` in `myconfig.py` to monitor the camera video streams. The published FPV images are accessible in `<car_ip_address>:8890`
 
-##### 2.2.2 User Guide
+##### 2.2.2 Start the Programm for Data Collection
 
-- Start the program (before that, make sure your car motor is powered on)
+- Plug the USB receiver of the Joystick controller into Jetson Nano, then start the program (before that, make sure your car motor is powered on):
 
 ```console
 $ cd ~/autorace
@@ -430,7 +431,7 @@ $ python manage.py drive --js
   - `left_stick_horz`: Left analog stick - Left and right to adjust steering
   - `right_stick_vert`: Right analog stick - Forward to increase forward throttle, and Backward to increase reverse throttle. No operation for zero throttle.
   - `toggle_mode`: Switches modes - "User, Local Angle, Local(angle and throttle)"
-  - `toggle_manual_recording`: Toggle recording of all data even if your car stops with zero throttle. This is disabled by default because a more suitable method *auto record on throttle* is enabled by default, which means that whenever the throttle is not zero, driving data will be recorded - as long as you are in user mode.
+  - `toggle_manual_recording`: Toggle recording of all data even if your car stops with zero throttle. This is disabled by default because a more suitable method *auto record on throttle* is enabled by default, which means that whenever the throttle is not zero, driving data will be recorded - as long as you are in user mode. The data will be saved in folder `data/tub_xx_xx_xx/` 
   - `erase_last_N_records`: You don't want to use bad data to train you network, such as collisions with walls. This function can erase the data in the last 5 sec to keep your dataset clean. The erased number depends on the set running sequence. For example, if the frequence is set to 20 Hz, then `N = 5 * 20 = 100`. 
   - `increase_max_throttle`: the max_throttle for joystick control is set to 0.5 by default (when right analog stick is pushed to the front). Press right shoulder to increase the max_throttle by `PER_THROTTLE_STEP` if you need more speed. `PER_THROTTLE_STEP` is 0.05 by default, you can change this in `myconfig.py`.
   - `decrease_max_throttle`: Simmilar to the above. Press left shoulder to decrease the max_throttle by `PER_THROTTLE_STEP`.
@@ -440,12 +441,21 @@ $ python manage.py drive --js
 
 
 
-##### 2.2.3 Data Collection Tips
-noise
+##### 2.2.3 Data Collection Procedure
 
-hz
+1. Place some obstacles on the track, and practice driving around the track a couple times. Considering you may not drive well at first, you can set `AUTO_RECORD_ON_THROTTLE = False` in `myconfig.py` to disable recording data automatically.
+2. When you're confident you can drive 10 laps without mistake, restart the python `mange.py` process to create a new tub session. Set `AUTO_RECORD_ON_THROTTLE = True`. The joystick will auto record with any non-zero throttle.
+3. If you crash or run off the track, loosen the throttle immediately to stop recording. Then tap the X button to erase the last 5 seconds of records.
+4. After you've collected 10-20 laps of good data (5-20k images) you can stop your car with `Ctrl+C` in the terminal session for your car. 
+5. The data you've collected is in the `data/` folder in the most recent tub folder.
 
-Randomly place different obstacles on the track.
+>After you finishing training a car can that can drive solely on the track based on the following procedure, you can return to this part and cooperate with another team to collect data on wheel-to-wheel driving (two cars running on the track). These data will be benefical for your model to learn how to behave in the presence of another car, such as overtaking and slowing down to avoid collisions.
+
+##### 2.2.4 Tips
+
+- To increase the robustness of your model, you should place different obstacles (colors, types) randomly on diffeent locations on the track during data collection.
+- `DRIVE_LOOP_HZ` set in `myconfig.py` is the max frequency that the drive loop should run. The actual frequency may be less than this if there are many blocking parts, e.g., your designed AI model is too complex to run quickly.
+- You can choose whether or not to add extra control noise in `user_mode`. If the value `CONTROL_NOISE` is set to `True` in `myconfig.py` (default value is `False`), random action noises on steering angle and throttle will be added during your tele-operation. This can help you to collect more divrese data that the car recovers from off-center and off-orientation mistakes. Based on these your trained agent can be more "intelligent". We also provide two scalars `THROTTLE_NOISE` and `ANGLE_NOISE` to adjust the level of noise. Note with this module acctivated, the data collection process will be difficult.
 
 
 ### 3. Model Training
@@ -475,11 +485,15 @@ $ python manage.py drive --model models/resnet18_trt.pth --half --trt --type res
 2. If the RC-Car crashes into the track fence at a high speed, the front wheels are likely to get stuck at their drive rods. Then you have to remove the two drive rods and reinstall them, which is a little troublesome. *It is suggested to simply removing the drive rod of the two front wheels, then this problem can be solved.* **Other hardware modifications are not allowed.**
 3. You are free to DIY your own algorithms to drive the car for competition, but the following functions in this repo should be kept:
    1. Press `ENTER` to start the car immediately when using autopilot mode
-4. If you think writing programs with Jupyter Lab is boring because it lacks code navigation functins like `go to defination` and `code suggestions`, you can choose [VSCode](https://code.visualstudio.com/) for development.
+4. If you think coding with Jupyter Lab is boring because it lacks code navigation functins like `go to defination` and `code suggestions`, you can choose [VSCode](https://code.visualstudio.com/) for development.
    
 >Visual Studio Code has a high productivity code editor which, when combined with programming language services, gives you the power of an IDE and the speed of a text editor. [In this topic](https://code.visualstudio.com/docs/editor/editingevolved#_quick-file-navigation), we'll first describe VS Code's language intelligence features (suggestions, parameter hints, smart code navigation) and then show the power of the core text editor.
 
-After installation, you can install the `Remote - SSH` extension within VSCode to let your editor connected to your RC-Car. The following is a video demo showing how.
+After installation, you can install the [`Remote - SSH`](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-ssh) extension within VSCode to let your editor connected to your RC-Car. The following is a video demo showing how.
+
+<div align=center>
+<img src=images/remote-ssh.gif width="100%">
+</div>
 
 
 [Back to Top](#table-of-contents)

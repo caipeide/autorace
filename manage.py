@@ -127,7 +127,7 @@ def drive(cfg, model_path=None, use_joystick=False, use_trt = False, use_half = 
     # 8. Print user guide
     # -------------------------------- 
     if type(ctr) is LocalWebController:
-        print("You can now go to <your hostname.local>:%d to drive your car." % cfg.WEB_CONTROL_PORT)
+        print("You can now go to <car_ip_address>:%d to drive your car." % cfg.WEB_CONTROL_PORT)
     elif isinstance(ctr, JoystickController):
         print("You can now move your joystick to drive your car.")
         #tell the controller about the tub
