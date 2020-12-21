@@ -355,7 +355,7 @@ Now that you have your car roughly calibrated you can try driving it to verify t
 #### 2.1 Driving with Web Controller
 > Only for basic testing. If you want to collect data in a more flexible way, use the joystick introduced in the next section [Driving with Physical Joystick Controller](#22-driving-with-physical-joystick-controller)
 
-This controller provides a [UI window](#drive-ui) accesable at `<car_ip_address>:8887`. After you run `python manage.py drive` this module will be loaded.
+This controller provides a [UI window](#drive-ui) accessible at `<car_ip_address>:8887`. After you run `python manage.py drive` this module will be loaded.
 
 ##### 2.1.1 Features
 
@@ -388,7 +388,7 @@ This controller provides a [UI window](#drive-ui) accesable at `<car_ip_address>
 
 ##### 2.2.1 Features
 
-- Recommended for data collection, much more flexible than web controller.
+- Recommended for data collection, much more flexible to operate the RC-Car than using web controller.
 - By default, no UI interface is published in this mode. However, you can set `USE_FPV = True` in `myconfig.py` to monitor the camera video streams. The published FPV images are accessible in `<car_ip_address>:8890`
 
 ##### 2.2.2 User Guide
@@ -401,7 +401,7 @@ $ python manage.py drive --js
 ```
 > Optionally, if you want joystick use to be sticky and don't want to add the `--js` each time, modify your `myconfig.py` so that `USE_JOYSTICK_AS_DEFAULT = True`
 
-- The joystick controls are shown as follows, they will also be printed on your sceen afer running the above commands.
+- The joystick controls are shown as follows, they will also be printed on your sceen when the program starts.
 
 ```console
 +------------------+--------------------------+
@@ -421,14 +421,32 @@ $ python manage.py drive --js
 +------------------+--------------------------+
 ```
 
-- Explainations on the actions
-  - toggle_mode: switches modes - "User, Local Angle, Local(angle and throttle)"
-  - 
+<div align=center>
+<img src=images/joystick.png width="80%">
+</div>
+
+
+- Explanations on the operations.
+  - `left_stick_horz`: Left analog stick - Left and right to adjust steering
+  - `right_stick_vert`: Right analog stick - Forward to increase forward throttle, and Backward to increase reverse throttle. No operation for zero throttle.
+  - `toggle_mode`: Switches modes - "User, Local Angle, Local(angle and throttle)"
+  - `toggle_manual_recording`: Toggle recording of all data even if your car stops with zero throttle. This is disabled by default because a more suitable method *auto record on throttle* is enabled by default, which means that whenever the throttle is not zero, driving data will be recorded - as long as you are in user mode.
+  - `erase_last_N_records`: You don't want to use bad data to train you network, such as collisions with walls. This function can erase the data in the last 5 sec to keep your dataset clean. The erased number depends on the set running sequence. For example, if the frequence is set to 20 Hz, then `N = 5 * 20 = 100`. 
+  - `increase_max_throttle`: the max_throttle for joystick control is set to 0.5 by default (when right analog stick is pushed to the front). Press right shoulder to increase the max_throttle by `PER_THROTTLE_STEP` if you need more speed. `PER_THROTTLE_STEP` is 0.05 by default, you can change this in `myconfig.py`.
+  - `decrease_max_throttle`: Simmilar to the above. Press left shoulder to decrease the max_throttle by `PER_THROTTLE_STEP`.
+  - `toggle_constant_throttle`: Toggle constant throttle. Sets to max throttle.
+  - `constant_rage_mode`: Start a constant throttle mode with very a large throttle `RAGE_THROTTLE = 0.75`. This can be useful at long and straight tracks, where you can quickly accelerate your car. The throttle value can be adjusted in `myconfig.py`
+  - `constant_gentle_mode`: Start a constant throttle mode with a low throttle `GENTLE_THROTTLE = 0.45`. This can be useful when RC-Car enters a sharp corner at high speeds, where you need to quickly slow the speed down but not stop. This throttle can also be adjusted in `myconfig.py`
+
 
 
 ##### 2.2.3 Data Collection Tips
+noise
+
+hz
+
 Randomly place different obstacles on the track.
-recording will be on if the throttle is not zero.
+
 
 ### 3. Model Training
 
