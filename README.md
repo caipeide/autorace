@@ -153,6 +153,10 @@ JetPack installation is quite simple: Flash the image to a microSD card -> Conne
 
 Remember do not upgrade the system after installation, even the system reminds you of that. Because some of our library dependencies rely on the current version of jetpack, which is 4.4.
 
+<div align=center>
+<img src=images/do_not_upgrade.png width="80%">
+</div>
+
 
 #### 1.2 Use JetCard to Quickly Configure the System
 
@@ -290,6 +294,10 @@ $ sudo apt install git
 ```
 - Then you can install the other dependencies.
 
+<div align=center>
+<img src=images/sys_config.png width="80%">
+</div>
+
 ```console
 $ cd ~
 $ git clone https://github.com/caipeide/autorace
@@ -300,6 +308,7 @@ $ conda create -n autorace python=3.6 -y
 $ conda activate autorace
 $ sh ./install_host_continue.sh
 ```
+
 
 [Back to Top](#table-of-contents)
 
@@ -535,16 +544,49 @@ After the training is finished, you can view how the training loss and validatio
 
 #### 3.3 Copy Model Back to RC-Car
 
+In previous step we managed to get a model trained on the data. Now is time to move the model back to RC-Car, so we can use it for testing it if it will drive itself.
+
+1. If you use your own computer for model training, open a new terminal on your host PC:
+
+```console
+$ cd ~/autorace
+$ rsync -rv --progress --partial ./models/resnet18.pth <car_account_name>@<car_ip_address>:~/autorace/models/
+```
+
+2. If you use the server for model training, open a new terminal on the RC-Car, then do the followings instead.
+
+```console
+$ cd ~/autorace
+$ rsync -rv -e 'ssh -p <port_number>' --progress --partial <server_account_name>@<server_ip_address>:~/autorace/models/resnet18.pth ./models/
+```
 
 #### 3.4 Accelerate your Model
 
+The `resnet18` model trained above runs about 150 ms/frame (6.7 Hz) on the car, which can cause problems if your car drives fast (not quickly enough to make a decision to take turns -> collision). Therefore, we will accelerate the model as follows:
+
 ```console
-$ python accel_model.py --model models/resnet18.pth --half --type resnet18
+$ cd ~/autorace
+$ python accel_model.py --model models/resnet18.pth --type resnet18
 ```
+
+The process takes about 1 ~ 2 min, and the accelerated model will be saved in `models/resnet18_trt.pth`. The inference speed of this model is about 50 ms/frame (20 Hz).
+
+Notes:
+1) You may have some problems if you try to acclerate a rnn model, which seems to be the limitation of the `torch2trt` library we use. Unfortunately, I have no solution on that.
+2) Add `--half` to the above command if you want to save memory usage of the neural network. Then the accelerated model will be using FP16 rather than FP32, allowing deployment of larger networks.
+
 ### 4. Model Testing
+
+>Ensure to place the car on the track and power on its motor so that it is ready to drive.
+
 ```console
-$ python manage.py drive --model models/resnet18_trt.pth --half --trt --type resnet18
+$ python manage.py drive --model models/resnet18_trt.pth --trt --type resnet18
 ```
+When all modules are ready (1 ~ 2 min to warm up), the program will notice you to press `ENTER` to start. Then the car should start to drive on it's own. Congratulations!
+
+Notes:
+
+1) Add `--half` to the above command if you use that during model acceleration.
 
 [Back to Top](#table-of-contents)
 
