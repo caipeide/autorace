@@ -4,7 +4,6 @@
 ![license](https://img.shields.io/github/license/caipeide/autorace)
 ![code_size](https://img.shields.io/github/languages/code-size/caipeide/autorace)
 ![total_Lines](https://img.shields.io/tokei/lines/github/caipeide/autorace)
-![last_update](https://img.shields.io/github/last-commit/caipeide/autorace)
 [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=Autonomous%20RC-Car%20Racing%20Competition%20in%20HKUST&url=https://github.com/caipeide/autorace&hashtags=rc_car,jetson_nano,deep_learning,visual_navigation,hkust)
 
 </div>
@@ -27,7 +26,7 @@ Autorace provides hardware and example codes to achieve vision-based autonomous 
 
 🏁 [Rules and Regulations](https://www.ec.ust.hk/sites/default/files/1/HKUST%20Autonomous%20RC-car%20Racing%20Competition_1.pdf)
 
-If you meet with any problems, feel free to create an [issue](https://github.com/caipeide/autorace/issues) to let me and other participants know, then we can solve it together 🌞
+If you meet with any problems, feel free to create an [issue](https://github.com/caipeide/autorace/issues) to let me and other participants know, then we can solve it together.
 
 If you like the project, give it a star ⭐. It means a lot to the people maintaining it 🧙
 
@@ -65,7 +64,10 @@ If you like the project, give it a star ⭐. It means a lot to the people mainta
       - [2.2.3 Data Collection Procedure](#223-data-collection-procedure)
       - [2.2.4 Tips](#224-tips)
   - [3. Model Training](#3-model-training)
-    - [3.1 Accelerate your Model](#31-accelerate-your-model)
+    - [3.1 Transfer Data from RC-Car to Host PC](#31-transfer-data-from-rc-car-to-host-pc)
+    - [3.2 Start Training Models](#32-start-training-models)
+    - [3.3 Copy Model Back to RC-Car](#33-copy-model-back-to-rc-car)
+    - [3.4 Accelerate your Model](#34-accelerate-your-model)
   - [4. Model Testing](#4-model-testing)
 - [Notes](#notes)
 - [Other Useful Toturials](#other-useful-toturials)
@@ -214,14 +216,14 @@ $ sudo nvpmodel -q
 [Back to Top](#table-of-contents)
 
 ### 2. Your Host PC
-> This is for model training
+> A host PC is needed for model training
 
 #### 2.1 Requirement
 
 * Nvidia GPU (at least with 6 GB frame buffer), e.g., RTX 2060, GTX 1080.
 * Ubuntu 18.04 system should be installed.
 
-*For the participants who do not have a NVIDIA graphics card (GPU) in their computer, they can apply for using our server to train their models, and skip the following section 2.2*
+*For participants who do not have a NVIDIA graphics card (GPU) in their computer, they can apply for using our server to train their models, and skip the following section 2.2. In this way, the laptop will be only used for remote connection to the RC-Car, which is doable on any system including Windows, MacOS and Ubuntu.*
 
 #### 2.2 Graphics Driver Installation
 
@@ -460,15 +462,71 @@ $ python manage.py drive --js
 
 ### 3. Model Training
 
+#### 3.1 Transfer Data from RC-Car to Host PC
+
+Training a deep neural network on Jetson Nano can be painful (quite slow 🐌). Therefore, we will use more powerful PCs for faster training. The first step is to copy the collected data from your RC-Car to the host PC.
+
+1. If you are using your own computer for model training, open a new terminal on your host PC and use `rsync` to copy your cars `data/` folder.
+
 ```console
-$ scp -P 1234 team1@xx.xx.xx.xx
+$ cd ~/autorace
+$ rsync -rv --progress --partial <car_account_name>@<car_ip_address>:~/autorace/data/ ./
 ```
+
+2. If you use the server for model training, open a new terminal on the RC-Car, then do the followings instead.
+
+```console
+$ cd ~/autorace
+$ rsync -rv -e 'ssh -p <port_number>' --progress --partial ./data/ <server_account_name>@<server_ip_address>:~/autorace/
+```
+
+Now you can check the new data in the folder `~/autorace/data/` on your host PC:
+
+```console
+$ ssh -p <port_number> <server_account_name>@<server_ip_address>  # if you use the server, connect to it via ssh first on your RC-Car
+$ ls ~/autorace/data/
+```
+The copied data folders will be printed. The following is an example.
+
+<div align=center>
+<img src=images/transfer_data.png width="80%">
+</div>
+
+#### 3.2 Start Training Models
+
+In the same terminal you can now run the training script on the latest tub by passing the path to that tub as an argument. For example,
+
+```console
+$ cd ~/autorace
+$ python manage.py train --model models/resnet18.pth --type resnet18 --tub data/tub_1_20-12-12/,data/tub_2_20-12-12
+```
+The trained model will be saved in `~/autorace/models/resnet18.pth`. Optionally you can pass no arguments for the tub, and then all tubs will be used in the default `data/` folder.
 
 ```console
 $ python manage.py train --model models/resnet18.pth --type resnet18
 ```
 
-#### 3.1 Accelerate your Model
+We provide three basic model types for training: *[linear](https://images.nvidia.com/content/tegra/automotive/images/2016/solutions/pdf/end-to-end-dl-using-px.pdf), [rnn](https://blog.floydhub.com/a-beginners-guide-on-recurrent-neural-networks-with-pytorch/) and [resnet18](https://arxiv.org/pdf/1512.03385.pdf)*. Click these hyperlinks for more details. The following image shows the model architecture from [Nvidia Self-Driving Car](https://developer.nvidia.com/blog/deep-learning-self-driving-cars/f) in 2016, which uses a series of convolutional layers and fully connected layers to learn driving behaviors.
+
+<div align=center>
+<img src=images/linear_model.png width="50%">
+</div>
+
+You can change these model architectures in `ai_drive_models.py`, where `linear -> LinearModel`, `rnn -> RNNModel` and `resnet18 -> LinearResModel`. Note the rnn model runs slowly on the RC-Car, thus it may not be suitable for racing.
+
+Other training parameters such as batchsize, learning rate, etc., can be configured in `myconfig.py`. Their default values should work well in most cases.
+
+After the training is finished, you can view how the training loss and validation loss decrease in `models/loss_plot_resnet18.png`.
+
+<div align=center>
+<img src=images/loss_plot.png width="70%">
+</div>
+
+#### 3.3 Copy Model Back to RC-Car
+
+
+#### 3.4 Accelerate your Model
+
 ```console
 $ python accel_model.py --model models/resnet18.pth --half --type resnet18
 ```
@@ -481,11 +539,13 @@ $ python manage.py drive --model models/resnet18_trt.pth --half --trt --type res
 
 ## Notes
 
-1. Do not directly turn off the power when system is running. Open a terminal and do`sudo shutdown`first to shutdown the OS system, then turn off the power.
-2. If the RC-Car crashes into the track fence at a high speed, the front wheels are likely to get stuck at their drive rods. Then you have to remove the two drive rods and reinstall them, which is a little troublesome. *It is suggested to simply removing the drive rod of the two front wheels, then this problem can be solved.* **Other hardware modifications are not allowed.**
-3. You are free to DIY your own algorithms to drive the car for competition, but the following functions in this repo should be kept:
+1. The ip address of the car may change automatically (it will change only once after each boot). If your JupyterLab losts connection, check if the car's ip is changed. If so, using the new ip to refresh the browser.
+2. If you collect lots of data, for example, more than 1000 images in a tub under `data/` folder, DO NOT try to open the tub folder and view images through JupyerLab, because it will cost much time to load the files and the GUI may freeze. You can transfer the data to your laptop to view.
+3. Do not directly turn off the power when system is running. Open a terminal and do`sudo shutdown`first to shutdown the OS system, then turn off the power.
+4. If the RC-Car crashes into the track fence at a high speed, the front wheels are likely to get stuck at their drive rods. Then you have to remove the two drive rods and reinstall them, which is a little troublesome. *It is suggested to simply removing the drive rod of the two front wheels, then this problem can be solved.* **Other hardware modifications are not allowed.**
+5. You are free to DIY your own algorithms to drive the car for competition, but the following functions in this repo should be kept:
    1. Press `ENTER` to start the car immediately when using autopilot mode
-4. If you think coding with Jupyter Lab is boring because it lacks code navigation functins like `go to defination` and `code suggestions`, you can choose [VSCode](https://code.visualstudio.com/) for development.
+6. If you think coding with Jupyter Lab is boring because it lacks code navigation functins like `go to defination` and `code suggestions`, you can choose [VSCode](https://code.visualstudio.com/) for development.
    
 >Visual Studio Code has a high productivity code editor which, when combined with programming language services, gives you the power of an IDE and the speed of a text editor. [In this topic](https://code.visualstudio.com/docs/editor/editingevolved#_quick-file-navigation), we'll first describe VS Code's language intelligence features (suggestions, parameter hints, smart code navigation) and then show the power of the core text editor.
 
