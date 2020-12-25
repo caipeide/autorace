@@ -203,7 +203,12 @@ Now you can disconnect the HDMI port, keyboard and mouse on the jetson nano and 
 
 To ensure that the Jetson Nano doesn't draw more current than the battery pack can supply, place the Jetson Nano in 5W mode by calling the following command.
 
-- You need to launch a new Terminal (by pressing `Ctrl+Alt+T`) and enter following commands to select 5W power mode:
+- You need to launch a new Terminal and enter following commands to select 5W power mode:
+
+<div align=center>
+<img src=images/open_terminal.png width="80%">
+</div>
+
 ```console
 $ sudo nvpmodel -m1
 ```
@@ -515,6 +520,12 @@ We provide three basic model types for training: *[linear](https://images.nvidia
 You can change these model architectures in `ai_drive_models.py`, where `linear -> LinearModel`, `rnn -> RNNModel` and `resnet18 -> LinearResModel`. Note the rnn model runs slowly on the RC-Car, thus it may not be suitable for racing.
 
 Other training parameters such as batchsize, learning rate, etc., can be configured in `myconfig.py`. Their default values should work well in most cases.
+
+During training you can run `nvidia-smi` in a terminal to check GPU power consumption and memory usage. The following shows a training demo.
+
+<div align=center>
+<img src=images/model_training.gif width="100%">
+</div>
 
 After the training is finished, you can view how the training loss and validation loss decrease in `models/loss_plot_resnet18.png`.
 
