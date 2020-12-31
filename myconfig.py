@@ -100,6 +100,6 @@ RAGE_THROTTLE = 0.7
 # # Whether or not add extra control noise during user mode
 # # IF set to TRUE, random action noise (on steering angle and throttle) will be added during your tele-operation. 
 # # This can help you to collect more data that the car recovers from off-center and off-orientation mistakes, and then your trained agent will be more "intelligent"
-CONTROL_NOISE = True
+# CONTROL_NOISE = True
 # THROTTLE_NOISE = 0.05          # should be > 0, then the range of throttle noise will be in [-THROTTLE_NOISE, THROTTLE_NOISE] (uniform random sampler), larger value leads to more difficult data collection
 # ANGLE_NOISE = 0.25             # should be > 0, then the range of steering noise will be in [-ANGLE_NOISE, ANGLE_NOISE] (uniform random sampler), larger value leads to more difficult data collection

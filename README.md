@@ -203,6 +203,19 @@ Now you can disconnect the HDMI port, keyboard and mouse on the jetson nano and 
 <img src=images/jupyterlab.png width="80%">
 </div>
 
+Finally, we clone this project to the RC-Car:
+
+```console
+$ cd ~/projects/donkeycar
+$ pip install -e .
+$ cd ~
+$ git clone https://github.com/caipeide/autorace
+```
+
+<div align=center>
+<img src=images/sys_config.png width="80%">
+</div>
+
 ##### 1.2.3 Tips
 
 To ensure that the Jetson Nano doesn't draw more current than the battery pack can supply, place the Jetson Nano in 5W mode by calling the following command.
@@ -285,18 +298,16 @@ After configuring your system, you can get started transmitting data between you
 
 ##### 2.3.2 Installation
 
-- If you are using your host PC, open a terminal and do the first three steps first in the following (they are already installed on the server)
+1. If you are using your own PC, open a terminal and do the first three steps first in the following (they are already installed on the server)
 
 ```console
 $ sudo apt update
 $ sudo apt install openssh-server
 $ sudo apt install git
 ```
-- Then you can install the other dependencies.
+2. Then you can install the other dependencies.
 
-<div align=center>
-<img src=images/sys_config.png width="80%">
-</div>
+>If you are using the server, connect to it with `ssh` first in a new terminal on your PC (or on the RC-Car with jupyterlab), for example, If you are using Ubuntu, open a new terminal (`Ctrl+Alt+T`) and `ssh -p <port_number> <server_account_name>@<server_ip_address>`. Then do the followings in the terminal for host configuration.
 
 ```console
 $ cd ~
@@ -562,7 +573,7 @@ $ rsync -rv -e 'ssh -p <port_number>' --progress --partial <server_account_name>
 
 #### 3.4 Accelerate your Model
 
-The `resnet18` model trained above runs about 150 ms/frame (6.7 Hz) on the car, which can cause problems if your car drives fast (not quickly enough to make a decision to take turns -> collision). Therefore, we will accelerate the model as follows:
+The `resnet18` model trained above runs about 150 ms/frame (6.7 Hz) on the car, which can cause problems if your car drives fast (not quickly enough to make a decision to take turns -> collision). Therefore, we will accelerate the model as follows on the RC-Car:
 
 ```console
 $ cd ~/autorace
