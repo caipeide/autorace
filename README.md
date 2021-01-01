@@ -459,7 +459,7 @@ $ python manage.py drive --js
   - `right_stick_vert`: Right analog stick - Forward to increase forward throttle, and Backward to increase reverse throttle. No operation for zero throttle.
   - `toggle_mode`: Switches modes - "User, Local Angle, Local(angle and throttle)"
   - `toggle_manual_recording`: Toggle recording of all data even if your car stops with zero throttle. This is disabled by default because a more suitable method *auto record on throttle* is enabled by default, which means that whenever the throttle is not zero, driving data will be recorded - as long as you are in user mode. The data will be saved in folder `data/tub_xx_xx_xx/` 
-  - `erase_last_N_records`: You don't want to use bad data to train you network, such as collisions with walls. This function can erase the data in the last 5 sec to keep your dataset clean. The erased number depends on the set running sequence. For example, if the frequence is set to 20 Hz, then `N = 5 * 20 = 100`. 
+  - `erase_last_N_records`: You don't want to use bad data to train you network, such as collisions with walls. This function can erase the data in the last 100 frames to keep your dataset clean.
   - `increase_max_throttle`: the max_throttle for joystick control is set to 0.5 by default (when right analog stick is pushed to the front). Press right shoulder to increase the max_throttle by `PER_THROTTLE_STEP` if you need more speed. `PER_THROTTLE_STEP` is 0.05 by default, you can change this in `myconfig.py`.
   - `decrease_max_throttle`: Simmilar to the above. Press left shoulder to decrease the max_throttle by `PER_THROTTLE_STEP`.
   - `toggle_constant_throttle`: Toggle constant throttle. Sets to max throttle.
