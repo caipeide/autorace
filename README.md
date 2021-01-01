@@ -495,14 +495,14 @@ Training a deep neural network on Jetson Nano can be painful (quite slow 🐌). 
 
 ```console
 $ cd ~/autorace
-$ rsync -rv --progress --partial <car_account_name>@<car_ip_address>:~/autorace/data/ ./
+$ rsync -rv --progress --partial <car_account_name>@<car_ip_address>:~/autorace/data ./
 ```
 
 2. If you use the server for model training, open a new terminal on the RC-Car, then do the followings instead.
 
 ```console
 $ cd ~/autorace
-$ rsync -rv -e 'ssh -p <port_number>' --progress --partial ./data/ <server_account_name>@<server_ip_address>:~/autorace/
+$ rsync -rv -e 'ssh -p <port_number>' --progress --partial ./data <server_account_name>@<server_ip_address>:~/autorace/
 ```
 
 Now you can check the new data in the folder `~/autorace/data/` on your host PC:
