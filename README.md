@@ -18,7 +18,7 @@ Autorace provides hardware and example codes to achieve vision-based autonomous 
 
 **Keywords:** autonomous racing, visual navigation, artifical intelligence, deep learning.
 
-**Maintaners:** [Peide Cai](https://www.ram-lab.com/people/#mr-peide-cai) &lt;pcaiaa@connect.ust.hk&gt; &emsp; **Supervisor:** [Prof. Ming Liu](https://www.ram-lab.com/people/#dr-ming-liu-director) &lt;eelium@ust.hk&gt;
+**Maintaners:** [Peide Cai](https://scholar.google.com/citations?user=D4YzMA8AAAAJ&hl=en) &lt;pcaiaa@connect.ust.hk&gt; &emsp; **Supervisor:** [Prof. Ming Liu](https://www.ram-lab.com/people/#dr-ming-liu-director) &lt;eelium@ust.hk&gt;
 
 💻 [Official Website](https://ecenter.ust.hk/events/hkust-autonomous-rc-car-racing-competition)
 
@@ -50,10 +50,11 @@ If you like the project, give it a star ⭐. It means a lot to the people mainta
       - [2.3.1 Features](#231-features)
       - [2.3.2 Installation](#232-installation)
 - [Start Your Journey of Self-Driving](#start-your-journey-of-self-driving)
-  - [1. Steering Calibration](#1-steering-calibration)
+  - [1. Calibration](#1-calibration)
     - [1.1 Configuration Files](#11-configuration-files)
-    - [1.2 Calibration](#12-calibration)
-    - [1.3 Fine Tuning and Testing Your Calibration](#13-fine-tuning-and-testing-your-calibration)
+    - [1.2 Throttle Calibration](#12-throttle-calibration)
+    - [1.3 Steering Calibration](#13-steering-calibration)
+    - [1.4 Fine Tuning and Testing Your Calibration](#14-fine-tuning-and-testing-your-calibration)
   - [2. Data Collection](#2-data-collection)
     - [2.1 Driving with Web Controller](#21-driving-with-web-controller)
       - [2.1.1 Features](#211-features)
@@ -325,7 +326,7 @@ $ sh ./install_host_continue.sh
 
 ## Start Your Journey of Self-Driving
 
-### 1. Steering Calibration
+### 1. Calibration
 
 #### 1.1 Configuration Files 
 
@@ -343,7 +344,7 @@ nano ~/autorace/myconfig.py
 
 Here *uncomment* means deleting the `#` symbol at the beginning of lines. In most editors, you can toggle between the *comment* and *uncomment* status by pressing `Ctrl+/`.
 
-#### 1.2 Calibration
+#### 1.2 Throttle Calibration
 
 > Make sure your car is off the ground to prevent a runaway situation.
 
@@ -352,6 +353,20 @@ Here *uncomment* means deleting the `#` symbol at the beginning of lines. In mos
 </div>
 
 1. Turn on your car and the motor, and connect to the car via Jupter Lab on your PC.
+2. Open a terminal and run `donkey calibrate --channel 1 --bus=1`
+3. Enter `370` when prompted for a PWM value. Then you should hear your ESC **beep** indicating that it's calibrated. If not, adjust this value a little, or else the motor won't work.
+4. Enter 400 and you should see your cars wheels start to go forward.
+5. Keep trying different values until you've found a reasonable max speed and remember this PWM value. *Remember do not set the max speed too high, otherwise, the front wheel of the car will be easily damaged when crashed at fence.* For repairing, refer to [this](#notes-repair).
+
+Reverse on RC cars is a little tricky because the ESC must receive a reverse pulse, zero pulse, reverse pulse to start to go backwards. To calibrate a reverse PWM setting...
+
+1. Enter the reverse value, for example `330`, then the zero throttle value you find above, then the reverse value again.
+2. Enter values +/- 10 of the reverse value to find a reasonable reverse speed. Remember this reverse PWM value.
+
+Enter these values in `myconfig.py` script as `THROTTLE_FORWARD_PWM`, `THROTTLE_STOPPED_PWM`, and `THROTTLE_REVERSE_PWM`.
+
+#### 1.3 Steering Calibration
+
 2. Open a terminal and run `donkey calibrate --channel 0 --bus=1`
 3. Enter 320 and you should see the wheels on your car move slightly. If not enter 400 or 300.
 4. Next enter values +/- 10 from your starting value to find the PWM setting that makes your car turn all the way left and all the way right. Remember these values.
@@ -360,7 +375,7 @@ Here *uncomment* means deleting the `#` symbol at the beginning of lines. In mos
 
 **Note**: You need to make sure that the value `(STEERING_LEFT_PWM + STEERING_RIGHT_PWM)*0.5` can make the front wheels face straight ahead, then the car can drive in a straight line with `steering = 0`.
 
-#### 1.3 Fine Tuning and Testing Your Calibration
+#### 1.4 Fine Tuning and Testing Your Calibration
 
 Now that you have your car roughly calibrated you can try driving it to verify that it drives as expected. Here's how to fine tune your car's calibration. 
 
@@ -476,7 +491,7 @@ $ python manage.py drive --js
 4. After you've collected 10-20 laps of good data (5-20k images) you can stop your car with `Ctrl+C` in the terminal session for your car. 
 5. The data you've collected is in the `data/` folder in the most recent tub folder.
 
->After you finishing training a car can that can drive solely on the track based on the following procedure, you can return to this part and cooperate with another team to collect data on wheel-to-wheel driving (two cars running on the track). These data will be benefical for your model to learn how to behave in the presence of another car, such as overtaking and slowing down to avoid collisions.
+>After you finish training a car can that can drive solely on the track based on the following procedure, **you should return to this part and cooperate with another team** to collect data on wheel-to-wheel driving (two cars running on the track). These data will be **crucial** for your model to learn how to behave in the presence of another car, such as overtaking and slowing down to avoid collisions. Otherwise, it is likely to perform poorly in the main race.
 
 ##### 2.2.4 Tips
 
@@ -606,7 +621,7 @@ Notes:
 1. The ip address of the car may change automatically (it will change only once after each boot). If your JupyterLab losts connection, check if the car's ip is changed. If so, using the new ip to refresh the browser.
 2. If you collect lots of data, for example, more than 1000 images in a tub under `data/` folder, DO NOT try to open the tub folder and view images through JupyerLab, because it will cost much time to load the files and the GUI may freeze. You can transfer the data to your laptop to view.
 3. Do not directly turn off the power when system is running. Open a terminal and do`sudo shutdown`first to shutdown the OS system, then turn off the power.
-4. If the RC-Car crashes into the track fence at a high speed, the front wheels are likely to get stuck at their drive rods. Then you have to take off the two drive rods and reinstall them, which is a little troublesome. *It is suggested to simply removing the drive rod of the two front wheels, then this problem can be solved.* [This video demonstrates how to fix the problem](https://youtu.be/y_o_JfhMo50). **Other hardware modifications are not allowed.**
+4. <span id=notes-repair>If the RC-Car crashes into the track fence at a high speed, the front wheels are likely to get stuck at their drive rods. Then you have to take off the two drive rods and reinstall them, which is a little troublesome. *It is suggested to simply removing the drive rod of the two front wheels, then this problem can be solved.* [This video demonstrates how to fix the problem](https://youtu.be/y_o_JfhMo50). **Other hardware modifications are not allowed.**
 5. You are free to DIY your own algorithms to drive the car for competition, but the following functions in this repo should be kept:
    1. Press `ENTER` to start the car immediately when using autopilot mode
 6. If you think coding with Jupyter Lab is boring because it lacks code navigation functins like `go to defination` and `code suggestions`, you can choose [VSCode](https://code.visualstudio.com/) for development.
