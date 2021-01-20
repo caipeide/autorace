@@ -42,7 +42,7 @@ class DriveClass:
             if img_arr is None:
                 continue
             
-            if self.model_type == 'linear':
+            if self.model_type == 'linear' or self.model_type == 'resnet18':
                 # print(img_arr.shape) # 224, 224, 3
                 img_arr = Image.fromarray(img_arr)
                 if self.half:
@@ -72,7 +72,7 @@ class DriveClass:
             self.run_throttle = run_throttle
             
     def run(self, img_arr):
-        if self.model_type == 'linear':
+        if self.model_type == 'linear' or self.model_type == 'resnet18':
             # print(img_arr.shape) # 224, 224, 3
             img_arr = Image.fromarray(img_arr)
             if self.half:
