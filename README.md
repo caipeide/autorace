@@ -12,15 +12,13 @@
 <img src=images/demo.gif width="70%">
 </div>
 
-Autorace provides hardware and example codes to achieve vision-based autonomous racing on RC-Cars. It is developed by [RAM-LAB](https://www.ram-lab.com/) to support *the 1st autonomous RC-Car racing competition* in Hong Kong University of Science and Technology (HKUST). The competition data is Feb 26, 2021 (tentative, due to COVID-19).
+Autorace provides hardware and example codes to achieve vision-based autonomous racing on RC-Cars. It is developed by [RAM-LAB](https://www.ram-lab.com/) to support *the 1st autonomous RC-Car racing competition* in Hong Kong University of Science and Technology (HKUST). The competition data is April 1, 2021.
 
 **Event Collaborators**: School of Engineering, Robotics Institue (RI), Robotics and Multiperception Lab (RAM-LAB), Intelligent Autonomous Driving Center, Entrepreneurship Center
 
 **Keywords:** autonomous racing, visual navigation, artifical intelligence, deep learning.
 
 **Maintaners:** [Peide Cai](https://scholar.google.com/citations?user=D4YzMA8AAAAJ&hl=en) &lt;pcaiaa@connect.ust.hk&gt; &emsp; **Supervisor:** [Prof. Ming Liu](https://www.ram-lab.com/people/#dr-ming-liu-director) &lt;eelium@ust.hk&gt;
-
-💻 [Official Website](https://ecenter.ust.hk/events/hkust-autonomous-rc-car-racing-competition)
 
 📹 [Demo & Workshops](https://sites.google.com/view/autorc-racing/)
 
@@ -29,6 +27,8 @@ Autorace provides hardware and example codes to achieve vision-based autonomous 
 If you meet with any problems, feel free to create an [issue](https://github.com/caipeide/autorace/issues) to let me and other participants know, then we can solve it together.
 
 If you like the project, give it a star ⭐. It means a lot to the people maintaining it 🧙
+
+📰 [Successful end to the first HKUST-Kaisa Autonomous RC Car Racing Competition](https://www.ec.ust.hk/news/successful-end-first-hkust-kaisa-autonomous-rc-car-racing-competition-great-support-kaisa)
 
 # Table of Contents <!-- omit in toc --> <span id=table-of-contents>
 - [Features](#features)
